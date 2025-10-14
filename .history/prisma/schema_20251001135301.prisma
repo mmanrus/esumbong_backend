@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  //output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite" //"postgresql"
+  url      = env("DATABASE_URL") //env("DATABASE_URL")
+}
+
+enum UserType {
+  admin
+  resident
+  barangay_official
+}
+
+enum roleType {
+  none
+}
+
+enum notificationType {
+  concern
+  feedback
+  summons
+  mediation
+  update
+  alert
+}
+
+enum ConcernStatus {
+  pending
+  inProgress
+  resolved
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  fullname      String
+  email         String    @unique
+  password      String
+  address       String
+  profilePhoto  String?
+  contactNumber String
+  role          roleType?
+  type          UserType
+
+  createAt           DateTime       @default(now())
+  // Resident Side
+  residentConcern    Concern[]      @relation("ResidentReports")
+  residentSummons    Summons[]      @relation("ResidentSummons")
+  residentMediations Mediation[]    @relation("ResidentMediations")
+  // OfficialSide
+  summonsIssued      Summons[]      @relation("OfficialSummons")
+  officialMediation  Mediation[]    @relation("OfficialMediations")
+  //Polymorphic
+  userFeedback       FeedBack[]     @relation("UserFeedbacks")
+  noticication       Noticication[] @relation("NotifyUser")
+}
+
+model Concern {
+  id        Int           @id @default(autoincrement())
+  title     String
+  details   String
+  status    ConcernStatus
+  userId    Int
+  user      User          @relation("ResidentReports", fields: [userId], references: [id])
+  Feedback  FeedBack[]    @relation("ConcernFeedback")
+  updatedAt DateTime?
+  issuedAt  DateTime      @default(now())
+  Summons   Summons[]     @relation("ConcernSummon")
+  Mediation Mediation[]   @relation("MediationConcern")
+}
+
+model FeedBack {
+  id        Int       @id @default(autoincrement())
+  details   String
+  issuedAt  DateTime  @default(now())
+  updatedAt DateTime?
+
+  authorId  Int
+  author    User    @relation("UserFeedbacks", fields: [authorId], references: [id])
+  concernId Int
+  concern   Concern @relation("ConcernFeedback", fields: [concernId], references: [id])
+}
+
+model Summons {
+  id Int @id @default(autoincrement())
+
+  // Resident who received summons
+  residentId Int
+  resident   User @relation("ResidentSummons", fields: [residentId], references: [id])
+
+  // Official who issued summons
+  officialId Int
+  official   User      @relation("OfficialSummons", fields: [officialId], references: [id])
+  concernId  Int
+  concern    Concern   @relation("ConcernSummon", fields: [concernId], references: [id])
+  remarks    String?
+  issuedAt   DateTime  @default(now())
+  updatedAt  DateTime?
+}
+
+model Mediation {
+  id         Int  @id @default(autoincrement())
+  residentId Int
+  resident   User @relation("ResidentMediations", fields: [residentId], references: [id])
+
+  officialId Int
+  official   User @relation("OfficialMediations", fields: [officialId], references: [id])
+
+  concernId Int
+  concern   Concern @relation("MediationConcern", fields: [concernId], references: [id])
+}
+
+model Noticication {
+  id        Int              @id @default(autoincrement())
+  type      notificationType
+  message   String?
+  url       String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  userId    Int
+  user      User             @relation("NotifyUser", fields: [userId], references: [id])
+}

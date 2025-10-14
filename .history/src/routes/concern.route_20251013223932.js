@@ -1,0 +1,58 @@
+import multer from "multer";
+import path from "path";
+import { Router } from "express";
+const router = new Router();
+
+import * as concernPost from "../controllers/concern/concern.post.js";
+import * as concernQuery from "../controllers/concern/concern.Query.js";
+import {
+  authenticateToken,
+  authorizeRole,
+  authorizeUser,
+} from "../middleware/auth.middleware.js";
+
+// 📂 Configure Multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./uploads/concerns"); // make sure this folder exists
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // unique filename
+  },
+});
+
+// 🧠 File filter (optional but recommended)
+const fileFilter = (req, file, cb) => {
+  const allowed = ["image/jpeg", "image/png", "video/mp4"];
+  if (allowed.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type. Only JPEG, PNG, or MP4 allowed."));
+  }
+};
+
+// ✅ Initialize Multer
+const upload = multer({ storage, fileFilter });
+
+router.post(
+  "/",
+  (req, res, next) => {
+    console.log("Incoming request:", req.body);
+    next();
+  },
+  authenticateToken,
+  upload.array("files", 5),
+  concernPost.createConcern
+);
+
+router.get(
+  "/:id",
+  (req, res, next) => {
+    console.log("Incoming request:", req.params);
+    next();
+  },
+  authenticateToken,
+  concernQuery.getConcernById
+);
+
+export default router;
