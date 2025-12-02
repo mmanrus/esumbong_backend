@@ -16,17 +16,17 @@ export const createConcern = async (req, res) => {
       message: "You cannot set both a category and 'other'."
     })  
   }
-  
+  }
   if (!details || !title) {
     return res.status(400).json({
       error: "Title and details fields are required",
     });
   }
   const userId = req.user?.userId;
-  categoryId = parseInt(categoryId)
+
   try {
     await concernService.createConcern(
-      { details, title, categoryId, other, files },
+      { details, title, category, files },
       parseInt(userId)
     );
     return res.status(200).json({

@@ -40,7 +40,6 @@ enum ConcernStatus {
 }
 
 model User {
-  //Fields
   id            Int       @id @default(autoincrement())
   fullname      String
   email         String    @unique
@@ -51,9 +50,8 @@ model User {
   contactNumber String
   role          roleType?
   type          UserType
-  createAt      DateTime  @default(now())
 
-  // ERD
+  createAt           DateTime         @default(now())
   // Resident Side
   residentConcern    Concern[]        @relation("ResidentReports")
   residentSummons    Summons[]        @relation("ResidentSummons")
@@ -81,7 +79,6 @@ model Concern {
   media      ConcernMedia[]
 
   category  Category?     @relation("ConcernCategory", fields: [categoryId], references: [id])
-  other     String?
   status    ConcernStatus @default(pending)
   userId    Int
   user      User          @relation("ResidentReports", fields: [userId], references: [id])
@@ -108,33 +105,32 @@ model Category {
 }
 
 model FeedBack {
-  //Fields
   id        Int       @id @default(autoincrement())
   details   String
   issuedAt  DateTime  @default(now())
   updatedAt DateTime?
-  //Relationships
+
   authorId  Int
-  author    User      @relation("UserFeedbacks", fields: [authorId], references: [id])
+  author    User    @relation("UserFeedbacks", fields: [authorId], references: [id])
   concernId Int
-  concern   Concern   @relation("ConcernFeedback", fields: [concernId], references: [id])
+  concern   Concern @relation("ConcernFeedback", fields: [concernId], references: [id])
 }
 
 model Summons {
-  // Fields
-  id        Int       @id @default(autoincrement())
-  remarks   String?
-  issuedAt  DateTime  @default(now())
-  updatedAt DateTime?
+  id Int @id @default(autoincrement())
+
   // Resident who received summons
-  // Official who issued summons
-  // Relationships
-  officialId Int
-  official   User    @relation("OfficialSummons", fields: [officialId], references: [id])
-  concernId  Int
-  concern    Concern @relation("ConcernSummon", fields: [concernId], references: [id])
   residentId Int
   resident   User @relation("ResidentSummons", fields: [residentId], references: [id])
+
+  // Official who issued summons
+  officialId Int
+  official   User      @relation("OfficialSummons", fields: [officialId], references: [id])
+  concernId  Int
+  concern    Concern   @relation("ConcernSummon", fields: [concernId], references: [id])
+  remarks    String?
+  issuedAt   DateTime  @default(now())
+  updatedAt  DateTime?
 }
 
 model Mediation {
@@ -152,7 +148,6 @@ model Mediation {
   schedule  DateTime
   updatedAt DateTime?
 }
-
 model Notification {
   id        Int              @id @default(autoincrement())
   type      NotificationType

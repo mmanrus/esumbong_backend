@@ -8,7 +8,7 @@ const router = new Router()
 router.get("/", authenticateToken, notificationQuery.getUserNotifications)
 
 
-router.delete("/delete/", authenticateToken, notificationPost.deleteNotification)
+router.dlete("/delete/", authenticateToken, notificationPost.deleteNotification)
 
 
 router.delete("/deleteAll/", authenticateToken, notificationPost.deleteAllUserNotifications)

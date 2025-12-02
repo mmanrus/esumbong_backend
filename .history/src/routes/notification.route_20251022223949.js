@@ -8,9 +8,9 @@ const router = new Router()
 router.get("/", authenticateToken, notificationQuery.getUserNotifications)
 
 
-router.delete("/delete/", authenticateToken, notificationPost.deleteNotification)
+router.get("/delete/", authenticateToken, notificationPost.deleteNotifications)
 
 
-router.delete("/deleteAll/", authenticateToken, notificationPost.deleteAllUserNotifications)
+router.get("/deleteAll/", authenticateToken, notificationPost.deleteNotifications)
 
 export default router
