@@ -3,6 +3,7 @@ import * as CategoryService from "../../services/category.service.js";
 export const createCategoryController = async (req, res) => {
   try {
     const { description, name } = req.body;
+    console.log("Creating category with data:", { description, name})
 
     if (!description || !name) {
       return res.status(400).json({
@@ -19,6 +20,8 @@ export const createCategoryController = async (req, res) => {
     });
   }
 };
+
+
 
 export const deleteCategoryController = async (req, res) => {
   try {

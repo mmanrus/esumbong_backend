@@ -5,14 +5,13 @@ import * as userService from "../../services/user.service.js";
  * Creates a new user.
  */
 export const createUser = async (req, res) => {
-  const { email, password, fullname, role, address, contactNumber } = req.body;
-  if (!email || !password || !fullname||!address || !role || !contactNumber) {
+  const { email, password, fullname, type, address, contactNumber } = req.body;
+  if (!email || !password || !fullname||!address || !type || !contactNumber) {
     return res.status(400).json({
       error:
-        "Missing required fields: email, password, fullname, username, and role",
+        "Missing required fields: email, password, fullname, username, and type",
     });
   }
-  const type = role
   try {
     const newUser = await userService.createUser({
       email,

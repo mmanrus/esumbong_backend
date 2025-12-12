@@ -7,7 +7,6 @@ import cookieParser from "cookie-parser";
 import { Router } from "express";
 import {
   authenticateToken,
-  authorizeRole,
   authorizeUser,
 } from "../middleware/auth.middleware.js";
 
@@ -23,6 +22,7 @@ router.post(
   userController.loginUser
 );
 
+// User Registration
 router.post(
   "/",
   (req, res, next) => {

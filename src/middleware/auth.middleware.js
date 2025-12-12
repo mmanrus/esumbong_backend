@@ -27,7 +27,7 @@ export const authenticateToken = (req, res, next) => {
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
       console.error("JWT verify failed:", err.message);
-      throw new Error("Error: ", err)
+      
       return res.status(403).json({ error: "Invalid or expired token" });
     }
 
@@ -42,7 +42,7 @@ export const authenticateToken = (req, res, next) => {
  */
 
 export const authorizeRole = (requiredRoles) => (req, res, next) => {
-  const userRole = req.user.role;
+  const userRole = req.user.type;
 
   // Check if requiredRoles is a string or an array
   const rolesArray = Array.isArray(requiredRoles)

@@ -2,6 +2,7 @@ import * as concernService from "../../services/concern.service.js";
 
 export const createConcern = async (req, res) => {
   const { title, details, categoryId, other } = req.body;
+  console.log("Creating concern with data:", req.body)
   const files = req.files.map((file) => ({
     url: `/uploads/concerns/${file.filename}`,
     type: file.mimetype.startsWith("video") ? "video" : "photo",
@@ -23,19 +24,47 @@ export const createConcern = async (req, res) => {
     });
   }
   const userId = req.user?.userId;
-  categoryId = parseInt(categoryId)
+  const id = parseInt(categoryId)
   try {
     await concernService.createConcern(
-      { details, title, categoryId, other, files },
+      { details, title, other, files },
+      id,
       parseInt(userId)
     );
     return res.status(200).json({
       message: "Your concern has been filed.",
     });
   } catch (error) {
-    console.error("Error creating ");
+    console.error("Error creating Concern:", error);
     return res.status(500).json({
       error: "An error occurred while creating the concern.",
     });
   }
 };
+
+export const updateConcernStatus = async (req, res) => {
+    const { concernId } = req.params
+    const { status, updateMessage } = req.body
+    const userId = req.user?.userId
+    if (!status) {
+      return res.status(400).json({
+        error: "Status field is required."
+      })
+    }
+    try {
+      const updatedConcern = await concernService.updateStatusConcern(
+        parseInt(userId),
+        parseInt(concernId),
+        {status, updateMessage}
+      )
+      return res.status(200).json({
+        message: "Concern status has been updated."
+      })
+
+    }catch (error) {
+      console.error("Error updating concern status: ", error)
+      return res.status(500).json({
+        error: "An error occurred upon updating the concern. "
+      })
+    }
+}

@@ -21,14 +21,18 @@ export const createConcern = async (data, categoryId, userId) => {
       user: true,
     },
   });
+  console.log("New concern created:", newConcern)
   const url = `${baseUrl}/concern/${newConcern.id}`;
   const message = `${newConcern.user.fullname} has filed concern.`;
   const officials = await prisma.user.findMany({
     where: {
-      type: "barangay_officials",
+      type: "barangay_official",
     },
+    select: {
+      id: true
+    }
   });
-
+  console.log("Officials to notify:", officials)
   await Promise.all(
     officials.map((official) => {
       prisma.notification.create({
@@ -43,6 +47,58 @@ export const createConcern = async (data, categoryId, userId) => {
   );
   return newConcern;
 };
+
+export const updateStatusConcern = async (userId, concernId, data) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId
+    },
+    select: {
+      type: "barangay_officials"
+    }
+  });
+  if (user?.type !== "barangay_officials") {
+    throw new Error("Unauthorized")
+  }
+  const updatedConcern = await prisma.concern.update({
+    where: {
+      id: concernId
+    },
+    data: {
+      status: data.status,
+
+    }
+  })
+  const url = `${baseUrl}/concern/${updatedConcern.id}`
+  const updateMessage = data.updateMessage || `Concern has been updated by the Officials to status: ${data.status}`;
+  const resident = await prisma.concern.findFirst({
+    where: {
+      id: concernId
+    },
+    select: {
+      user: {
+        userId: true,
+        fullname: true,
+      }
+    }
+  })
+  await prisma.notification.create({
+    data: {
+      url: url,
+      message: `Your concern has been ${data.status}`,
+      type: "concern",
+      userId: resident.user.userId
+    }
+  })
+  const concernUpdate = await prisma.concernUpdate.create({
+    data: {
+      updateMessage: updateMessage,
+      concernId: concernId,
+      status: data.status,
+    }
+  })
+  return concernUpdate
+}
 
 export const getConcernById = async (concernId) => {
   const concern = await prisma.concern.findFirst({
@@ -79,3 +135,26 @@ export const getConcernById = async (concernId) => {
   });
   return concern;
 };
+
+export const getAllConcerns = async (filter) => {
+  return await prisma.concern.findMany({
+    where: filter || {}
+  })
+}
+
+
+export const getResidentConcerns = async (userId) => {
+  return await prisma.concern.findMany({
+    where: {
+      userId
+    }
+  })
+}
+
+export const getConcernUpdates = async (concernId) => {
+  return await prisma.concernUpdate.findMany({
+    where: {
+      concernId
+    }
+  })
+}

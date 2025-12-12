@@ -5,7 +5,9 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
-
+if (!JWT_SECRET || !REFRESH_SECRET) {
+  throw new Error("JWT_SECRET and REFRESH_SECRET must be defined in environment variables");
+}
 const prisma = new PrismaClient();
 
 /**
@@ -23,7 +25,7 @@ export const createUser = async (userData) => {
       password: hashedPassword,
     },
   });
-
+ 
   const { password, ...userWithoutPassword } = user;
   return userWithoutPassword;
 };
@@ -36,28 +38,35 @@ export const createUser = async (userData) => {
  * @returns {Promise<object|null>} An object with the user and the JWT if successful, or null if authentication fails.
  */
 export const loginUser = async (email, password) => {
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-  if (!user || !(await bcrypt.compare(password, user.password))) return null;
-  const token = jwt.sign(
-    {
-      userId: user.id,
-      type: user.type,
-    },
+  email = email.trim();
+  password = password.trim();
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    return { success: false, message: "User not found" };
+  }
+
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  if (!passwordMatch) {
+    return { success: false, message: "Incorrect password" };
+  }
+
+  const access = jwt.sign(
+    { userId: user.id, type: user.type }, // store 'type' to match middleware
     JWT_SECRET,
     { expiresIn: "15m" }
   );
 
-  const refresh_token = jwt.sign(
-    {
-      userId: user.id,
-    },
-    REFRESH_SECRET,
-    { expiresIn: "7d" }
-  );
+  const refresh = jwt.sign({ userId: user.id }, REFRESH_SECRET, { expiresIn: "7d" });
+
   const { password: _, ...userWithoutPassword } = user;
-  return { user: userWithoutPassword, access: token, refresh:refresh_token };
+
+  return {
+    success: true,
+    user: userWithoutPassword,
+    access,
+    refresh,
+  };
 };
 
 /**

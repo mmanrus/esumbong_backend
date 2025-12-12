@@ -2,13 +2,12 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export const createCategory = async (categories) => {
-  return await prisma.category.createMany({
-    data: categories.map((category) => ({
+export const createCategory = async (category) => {
+  return await prisma.category.create({
+    data: {
       name: category.name,
       description: category.description,
-    })),
-    skipDuplicates: true,
+    }
   });
 };
 
