@@ -2,14 +2,19 @@ import { PrismaClient } from "@prisma/client";
 
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
+import Resend from 'resend'
 const JWT_SECRET = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
-if (!JWT_SECRET || !REFRESH_SECRET) {
+
+const RESEND_API_SECRET = process.env.RESEND_API_SECRET;
+import crypto from "crypto";
+
+const token = crypto.randomUUID();
+if (!JWT_SECRET || !REFRESH_SECRET || RESEND_API_SECRET) {
   throw new Error("JWT_SECRET and REFRESH_SECRET must be defined in environment variables");
 }
 const prisma = new PrismaClient();
-
+const resend = new Resend(RESEND_API_SECRET);
 /**
  * @description
  * Creates a new user in the database.
@@ -19,6 +24,18 @@ const prisma = new PrismaClient();
 
 export const createUser = async (userData) => {
   const hashedPassword = await bcrypt.hash(userData.password, 10);
+  await resend.emails.send({
+    from: "no-reply@esumbong.app", // must be verified domain
+    to: email,                    // user's email (gmail ok)
+    subject: "Verify your email",
+    html: `
+    <h2>Verify your email</h2>
+    <p>Click the link below:</p>
+    <a href="${process.env.APP_URL}/verify-email?token=${token}">
+      Verify Email
+    </a>
+  `,
+  });
   const user = await prisma.user.create({
     data: {
       ...userData,
