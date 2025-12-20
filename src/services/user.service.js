@@ -25,7 +25,7 @@ export const createUser = async (userData) => {
       password: hashedPassword,
     },
   });
- 
+
   const { password, ...userWithoutPassword } = user;
   return userWithoutPassword;
 };

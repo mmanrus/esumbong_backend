@@ -20,8 +20,6 @@ enum UserType {
   barangay_official
 }
 
-
-
 enum NotificationType {
   concern
   feedback
@@ -39,17 +37,17 @@ enum ConcernStatus {
 
 model User {
   //Fields
-  id            Int       @id @default(autoincrement())
-  fullname      String
-  email         String    @unique
-  password      String
-  address       String
-  profilePhoto  String?
-  position      String?
-  contactNumber String
-  type          UserType @default(admin)
-  createAt      DateTime  @default(now())
-
+  id                 Int              @id @default(autoincrement())
+  fullname           String
+  email              String           @unique
+  password           String
+  address            String
+  profilePhoto       String?
+  position           String?
+  contactNumber      String
+  type               UserType         @default(admin)
+  createAt           DateTime         @default(now())
+  verified           Boolean          @default(false)
   // ERD
   // Resident Side
   residentConcern    Concern[]        @relation("ResidentReports")

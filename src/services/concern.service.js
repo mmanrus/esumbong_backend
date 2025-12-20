@@ -1,8 +1,19 @@
 import { PrismaClient } from "@prisma/client";
+import { Knock } from "@knocklabs/node/client.js";
+const api_key = process.env.KNOCK_API_SECRET
+if (!api_key) {
+  throw new Error("Missing: KNOCK_API_SECRET")
+}
+const knockClient = new Knock({
+  apiKey: api_key,
+  environment: "production", // make sure this matches
+})
+
 
 const prisma = new PrismaClient();
 const baseUrl = process.env.FRONTEND_URL;
 export const createConcern = async (data, categoryId, userId) => {
+
   const newConcern = await prisma.concern.create({
     data: {
       title: data.title,
@@ -21,7 +32,6 @@ export const createConcern = async (data, categoryId, userId) => {
       user: true,
     },
   });
-  console.log("New concern created:", newConcern)
   const url = `${baseUrl}/concern/${newConcern.id}`;
   const message = `${newConcern.user.fullname} has filed concern.`;
   const officials = await prisma.user.findMany({
@@ -29,10 +39,39 @@ export const createConcern = async (data, categoryId, userId) => {
       type: "barangay_official",
     },
     select: {
-      id: true
+      id: true,
+      email: true,
+      fullname: true
     }
   });
-  console.log("Officials to notify:", officials)
+  try {
+    console.log(officials)
+    console.log("User id:", newConcern.user.id)
+    console.log("User fullname:", newConcern.user.fullname)
+    console.log("User id:", newConcern.user.email)
+    console.log("Url:", url)
+    console.log("title:", newConcern.title)
+    console.log("details:", newConcern.details)
+    console.log("Date:", newConcern.issuedAt.toISOString())
+    await knockClient.workflows.trigger("create-concern", {
+      actor: {
+        id: newConcern.user.id.toString(),
+        name: newConcern.user.fullname,
+        email: newConcern.user.email,
+      },
+      data: {
+        fullname: newConcern.user.fullname,
+        title: newConcern.title,
+        details: newConcern.details,
+        url,
+        date: newConcern.issuedAt.toISOString(), // ✅ MUST be string
+      },
+      recipients: officials.map((o) => o.id.toString()), // ✅ IDs only
+    });
+  } catch (error) {
+    console.log("Error : ", error)
+  }
+
   await Promise.all(
     officials.map((official) => {
       prisma.notification.create({
@@ -47,7 +86,7 @@ export const createConcern = async (data, categoryId, userId) => {
   );
   return newConcern;
 };
-
+// !Update COncern
 export const updateStatusConcern = async (userId, concernId, data) => {
   const user = await prisma.user.findFirst({
     where: {
