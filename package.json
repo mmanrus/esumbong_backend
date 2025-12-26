@@ -17,8 +17,8 @@
     "sqlite3": "^5.1.7"
   },
   "dependencies": {
-    "@knocklabs/node": "^1.25.0",
     "@prisma/client": "^6.16.3",
+    "@supabase/supabase-js": "^2.89.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -26,6 +26,9 @@
     "formdata-node": "^6.0.3",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
-    "resend": "^6.6.0"
+    "nodemailer": "^7.0.12",
+    "pg": "^8.16.3",
+    "postgres": "^3.4.7",
+    "ws": "^8.18.3"
   }
 }

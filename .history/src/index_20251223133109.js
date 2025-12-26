@@ -6,10 +6,9 @@ import notificationRouter from "./routes/notification.route.js";
 import userRouter from "./routes/user.routes.js";
 import concernRouter from "./routes/concern.route.js";
 import categoryRouter from "./routes/category.route.js";
-import { startListener } from "./lib/notificationListener.js"
+
 dotenv.config();
 
-await startListener()
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
