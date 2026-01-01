@@ -1,15 +1,13 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js"
 
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
-import crypto from "crypto";
 
 if (!JWT_SECRET || !REFRESH_SECRET) {
   throw new Error("JWT_SECRET and REFRESH_SECRET must be defined in environment variables");
 }
-const prisma = new PrismaClient();
 /**
  * @description
  * Creates a new user in the database.

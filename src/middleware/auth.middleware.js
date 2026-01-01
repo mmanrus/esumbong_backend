@@ -2,10 +2,10 @@
 // This file acts as the 'bouncer' for our protected routes.
 
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
 // In a real-world application, this secret key must be stored securely
 // in an environment variable, like process.env.JWT_SECRET.
-const prisma = new PrismaClient();
+import { prisma } from "../lib/prisma.js"
+
 /**
  * @description
  * Middleware to check for a valid JWT in the request header.

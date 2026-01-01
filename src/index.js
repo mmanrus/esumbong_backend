@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 //! ROUTES
@@ -7,7 +7,6 @@ import userRouter from "./routes/user.routes.js";
 import concernRouter from "./routes/concern.route.js";
 import categoryRouter from "./routes/category.route.js";
 import { startListener } from "./lib/notificationListener.js"
-dotenv.config();
 
 await startListener()
 const app = express();

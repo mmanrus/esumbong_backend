@@ -1,6 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js"
 import { transporter } from "../lib/email.js";
-const prisma = new PrismaClient();
 const baseUrl = process.env.FRONTEND_URL;
 export const createConcern = async (data, categoryId, userId) => {
   const newConcern = await prisma.concern.create({
@@ -39,6 +38,7 @@ export const createConcern = async (data, categoryId, userId) => {
       await prisma.notification.create({
         data: {
           url,
+          itemId: newConcern.id,
           message,
           type: "concern",
           userId: official.id,
@@ -126,6 +126,7 @@ export const updateStatusConcern = async (userId, concernId, data) => {
 };
 
 export const getConcernById = async (concernId) => {
+  console.log("Fetching concern with ID:", concernId);
   const concern = await prisma.concern.findFirst({
     where: {
       id: parseInt(concernId),
@@ -136,7 +137,7 @@ export const getConcernById = async (concernId) => {
           id: true,
           fullname: true,
           email: true,
-          role: true,
+          type: true,
         },
       },
       category: {
@@ -154,10 +155,11 @@ export const getConcernById = async (concernId) => {
         },
       },
       details: true,
-      createdAt: true,
+      issuedAt: true,
       updatedAt: true,
     },
   });
+  console.log("Fetched concern:", concern);
   return concern;
 };
 

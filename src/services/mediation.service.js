@@ -1,3 +1,1 @@
-import 
-
-const 
+import { prisma } from "../lib/prisma.js"

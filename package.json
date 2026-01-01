@@ -13,15 +13,18 @@
   "description": "",
   "devDependencies": {
     "nodemon": "^3.1.10",
-    "prisma": "^6.16.3",
+    "prisma": "^7.2.0",
     "sqlite3": "^5.1.7"
   },
   "dependencies": {
-    "@prisma/client": "^6.16.3",
+    "@neondatabase/serverless": "^1.0.2",
+    "@prisma/adapter-neon": "^7.2.0",
+    "@prisma/client": "^7.2.0",
     "@supabase/supabase-js": "^2.89.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "formdata-node": "^6.0.3",
     "jsonwebtoken": "^9.0.2",

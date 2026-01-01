@@ -1,6 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js"
 
-const prisma = new PrismaClient();
 const baseUrl = process.env.FRONTEND_URL;
 
 export const createFeedback = async (data, userId) => {

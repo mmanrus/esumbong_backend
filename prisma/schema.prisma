@@ -11,7 +11,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL_NEON")
 }
 
 enum UserType {
@@ -175,6 +174,7 @@ model Mediation {
 model Notification {
   id        Int              @id @default(autoincrement())
   type      NotificationType
+  itemId    Int?
   message   String?
   url       String
   read      Boolean          @default(false)

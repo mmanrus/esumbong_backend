@@ -1,6 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js"
 
-const prisma = new PrismaClient();
 
 export const getUserNotifications = async (userId) => {
   return await prisma.notification.findMany({
@@ -8,8 +7,11 @@ export const getUserNotifications = async (userId) => {
     select: {
       id: true,
       url: true,
+      itemId: true,
       message: true,
       createdAt: true,
+      type: true,
+      read: true,
     },
     orderBy: {
       createdAt: "desc",
