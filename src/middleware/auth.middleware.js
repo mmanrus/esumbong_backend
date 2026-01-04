@@ -4,7 +4,7 @@
 import jwt from "jsonwebtoken";
 // In a real-world application, this secret key must be stored securely
 // in an environment variable, like process.env.JWT_SECRET.
-import { prisma } from "../lib/prisma.js"
+import prisma from "../lib/prisma.js"
 
 /**
  * @description

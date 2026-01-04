@@ -7,6 +7,7 @@ import userRouter from "./routes/user.routes.js";
 import concernRouter from "./routes/concern.route.js";
 import categoryRouter from "./routes/category.route.js";
 import { startListener } from "./lib/notificationListener.js"
+console.log("DATABASE_URL:", process.env.DATABASE_URL_NEON);
 
 await startListener()
 const app = express();

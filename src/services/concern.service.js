@@ -1,4 +1,4 @@
-import { prisma } from "../lib/prisma.js"
+import prisma from "../lib/prisma.js"
 import { transporter } from "../lib/email.js";
 const baseUrl = process.env.FRONTEND_URL;
 export const createConcern = async (data, categoryId, userId) => {
