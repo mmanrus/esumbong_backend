@@ -6,6 +6,9 @@ import notificationRouter from "./routes/notification.route.js";
 import userRouter from "./routes/user.routes.js";
 import concernRouter from "./routes/concern.route.js";
 import categoryRouter from "./routes/category.route.js";
+
+import multer from "multer";
+import summonRouter from "./routes/summon.route.js";
 import { startListener } from "./lib/notificationListener.js"
 console.log("DATABASE_URL:", process.env.DATABASE_URL_NEON);
 
@@ -26,12 +29,22 @@ app.use("/api/users/", userRouter);
 app.use("/api/concern/", concernRouter);
 
 app.use("/api/category/", categoryRouter);
+app.use("/api/summon/", summonRouter);
+
 
 app.use("/api/notification/", notificationRouter);
 app.use((req, res, next) => {
   console.log("Request:", req.method, req.url);
   next();
 });
+
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError || err.message.includes("Invalid file type")) {
+        return res.status(400).json({ message: err.message });
+    }
+    next(err);
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
@@ -83,6 +96,19 @@ app.listen(PORT, () => {
       const methods = Object.keys(route.methods).join(", ").toUpperCase();
       console.log(
         `- ${methods} http://localhost:${PORT}${basePath}category${route.path}`
+      );
+    }
+  });
+  
+
+  console.log("<<=========== Summon Router =========>>");
+  summonRouter.stack.forEach((layer) => {
+    // Check if the layer is a router and has a route
+    if (layer.route) {
+      const route = layer.route;
+      const methods = Object.keys(route.methods).join(", ").toUpperCase();
+      console.log(
+        `- ${methods} http://localhost:${PORT}${basePath}summon${route.path}`
       );
     }
   });

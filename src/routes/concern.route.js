@@ -45,6 +45,12 @@ router.post(
   concernPost.createConcern
 );
 
+router.get("/",
+  authenticateToken,
+  authorizeRole("barangay_official"),
+  concernQuery.getAllConcern
+)
+
 router.get(
   "/:id",
   (req, res, next) => {
@@ -54,5 +60,16 @@ router.get(
   authenticateToken,
   concernQuery.getConcernById
 );
+
+router.patch("/validate/:id",
+  authenticateToken,
+  authorizeRole("barangay_official"),
+  concernPost.validateConcern
+)
+
+router.get("/updates/:id",
+  authenticateToken,
+  concernQuery.getConcernUpdatesById
+)
 
 export default router;

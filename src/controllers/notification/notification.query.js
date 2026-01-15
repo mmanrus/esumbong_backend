@@ -9,7 +9,6 @@ export const getUserNotifications = async (req, res) => {
     const notifications = await notificationService.getUserNotifications(
       userId
     );
-    console.log("Retrieved notifications:", notifications)
     return res.status(200).json({
       data: notifications,
       count: notifications.length,

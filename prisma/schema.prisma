@@ -31,7 +31,17 @@ enum NotificationType {
 enum ConcernStatus {
   pending
   inProgress
+  canceled
+  approved
+  rejected
   resolved
+  summoned
+}
+
+enum Validation {
+  pending
+  approved
+  rejected
 }
 
 model User {
@@ -59,6 +69,8 @@ model User {
   userFeedback       Feedback[]       @relation("UserFeedbacks")
   noticication       Notification[]   @relation("UserNotifications")
   SystemFeedback     SystemFeedback[] @relation("UserSystemFeedback")
+
+  validatedConcerns Concern[] @relation("ValidatedConcern")
 }
 
 enum MediaType {
@@ -67,22 +79,29 @@ enum MediaType {
 }
 
 model Concern {
-  id         Int             @id @default(autoincrement())
-  title      String?
-  details    String
-  location   String?
-  categoryId Int?
-  media      Media[]
-  category   Category?       @relation("ConcernCategory", fields: [categoryId], references: [id])
-  other      String?
-  status     ConcernStatus   @default(pending)
-  userId     Int
-  user       User            @relation("ResidentReports", fields: [userId], references: [id])
-  updatedAt  DateTime?
-  issuedAt   DateTime        @default(now())
-  updates    ConcernUpdate[] @relation("ConcernUpdates")
-  Summons    Summons[]       @relation("ConcernSummon")
-  Mediation  Mediation[]     @relation("MediationConcern")
+  id                      Int     @id @default(autoincrement())
+  title                   String?
+  details                 String
+  location                String?
+  categoryId              Int?
+  // validation 
+  needsBarangayAssistance Boolean @default(false)
+
+  validation    Validation      @default(pending)
+  validatedById Int?
+  validatedBy   User?           @relation("ValidatedConcern", fields: [validatedById], references: [id])
+  validatedAt   DateTime?
+  media         Media[]
+  category      Category?       @relation("ConcernCategory", fields: [categoryId], references: [id])
+  other         String?
+  status        ConcernStatus   @default(pending)
+  userId        Int
+  user          User            @relation("ResidentReports", fields: [userId], references: [id])
+  updatedAt     DateTime?
+  issuedAt      DateTime        @default(now())
+  updates       ConcernUpdate[] @relation("ConcernUpdates")
+  Summons       Summons[]       @relation("ConcernSummon")
+  Mediation     Mediation[]     @relation("MediationConcern")
 }
 
 model ConcernUpdate {
@@ -91,14 +110,16 @@ model ConcernUpdate {
   status        ConcernStatus
   createdAt     DateTime      @default(now())
   concernId     Int
-  // Match the relation name here
   concern       Concern       @relation("ConcernUpdates", fields: [concernId], references: [id])
 }
 
 model Media {
-  id         Int       @id @default(autoincrement())
-  url        String
-  type       MediaType
+  id   Int       @id @default(autoincrement())
+  url  String
+  type MediaType
+
+  summonId   Int?
+  summmon    Summons?  @relation(fields: [summonId], references: [id])
   concernId  Int?
   concern    Concern?  @relation(fields: [concernId], references: [id])
   feedbackId Int?
@@ -140,19 +161,23 @@ model FeedbackUpdate {
 
 model Summons {
   // Fields
-  id         Int       @id @default(autoincrement())
-  remarks    String?
-  issuedAt   DateTime  @default(now())
+  id         Int            @id @default(autoincrement())
+  remarks    ConcernStatus?
+  summonDate   DateTime?
+  startTime  DateTime?
+  endTime    DateTime?
+  issuedAt   DateTime       @default(now())
   updatedAt  DateTime?
+  media      Media[]
   // Resident who received summons
   // Official who issued summons
   // Relationships
   officialId Int
-  official   User      @relation("OfficialSummons", fields: [officialId], references: [id])
+  official   User           @relation("OfficialSummons", fields: [officialId], references: [id])
   concernId  Int
-  concern    Concern   @relation("ConcernSummon", fields: [concernId], references: [id])
+  concern    Concern        @relation("ConcernSummon", fields: [concernId], references: [id])
   residentId Int
-  resident   User      @relation("ResidentSummons", fields: [residentId], references: [id])
+  resident   User           @relation("ResidentSummons", fields: [residentId], references: [id])
 }
 
 model Mediation {

@@ -1,67 +1,72 @@
 import pg from "pg"
 import { WebSocketServer } from "ws"
 
-const { Pool } = pg
+const { Client } = pg
 
 const unpooledUrl = process.env.URL_NEON_UNPOOLED
-if (!unpooledUrl) {
-  throw new Error("URL_NEON_UNPOOLED is not set")
-}
-
-const pool = new Pool({
-  connectionString: unpooledUrl,
-  ssl: { rejectUnauthorized: false },
-})
+if (!unpooledUrl) throw new Error("URL_NEON_UNPOOLED is not set")
 
 export const wss = new WebSocketServer({ port: 4001 })
 
-let listenerClient;
+let listenerClient = null
+let reconnecting = false
 
 async function connectListener() {
+  if (reconnecting) return
+  reconnecting = true
+
   try {
     console.log("🔌 Connecting LISTEN client...")
 
-    listenerClient = await pool.connect()
+    listenerClient = new Client({
+      connectionString: unpooledUrl,
+      ssl: { rejectUnauthorized: false },
+      keepAlive: true,
+    })
 
+    await listenerClient.connect()
     await listenerClient.query("LISTEN notifications")
+
     console.log("👂 Listening on channel: notifications")
 
     listenerClient.on("notification", (msg) => {
       if (!msg.payload) return
-
       const payload = JSON.parse(msg.payload)
 
-      wss.clients.forEach((client) => {
+      for (const client of wss.clients) {
         if (client.readyState === 1) {
           client.send(JSON.stringify(payload))
         }
-      })
+      }
     })
 
     listenerClient.on("error", (err) => {
       console.error("❌ PG listener error:", err.message)
-      reconnect()
+      cleanupAndReconnect()
     })
 
     listenerClient.on("end", () => {
       console.warn("⚠️ PG listener ended")
-      reconnect()
+      cleanupAndReconnect()
     })
   } catch (err) {
     console.error("❌ Failed to start listener:", err)
-    reconnect()
+    cleanupAndReconnect()
+  } finally {
+    reconnecting = false
   }
 }
 
-function reconnect() {
+function cleanupAndReconnect() {
   if (listenerClient) {
-    listenerClient.release()
+    try {
+      listenerClient.removeAllListeners()
+      listenerClient.end().catch(() => {})
+    } catch {}
     listenerClient = null
   }
 
-  setTimeout(() => {
-    connectListener()
-  }, 2000) // retry after 2s
+  setTimeout(connectListener, 3000)
 }
 
 export function startListener() {
