@@ -6,13 +6,14 @@ import notificationRouter from "./routes/notification.route.js";
 import userRouter from "./routes/user.routes.js";
 import concernRouter from "./routes/concern.route.js";
 import categoryRouter from "./routes/category.route.js";
-
+import path from "path"
 import multer from "multer";
 import summonRouter from "./routes/summon.route.js";
 import { startListener } from "./lib/notificationListener.js"
 console.log("DATABASE_URL:", process.env.DATABASE_URL_NEON);
 
 await startListener()
+
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -20,6 +21,10 @@ if (!JWT_SECRET) {
 }
 const PORT = process.env.PORT || 3005;
 
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"))
+);
 // Add these middlewares BEFORE your routes
 app.use(cors());
 app.use(express.json());

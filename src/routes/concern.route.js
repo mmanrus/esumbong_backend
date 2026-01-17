@@ -41,9 +41,21 @@ router.post(
     next();
   },
   authenticateToken,
+  authorizeRole("resident"),
   upload.array("files", 5),
   concernPost.createConcern
 );
+
+router.delete(
+  "/:id",
+  (req, res, next) => {
+    console.log("Incoming request Deleting Concern:", req.params);
+    next();
+  },
+  authenticateToken,
+  authorizeRole(["resident", "barangay_official"]),
+  concernPost.deleteConcern
+)
 
 router.get("/",
   authenticateToken,
@@ -53,14 +65,22 @@ router.get("/",
 
 router.get(
   "/:id",
-  (req, res, next) => {
+  (req, _, next) => {
     console.log("Incoming request:", req.params);
     next();
   },
   authenticateToken,
   concernQuery.getConcernById
 );
-
+router.patch("/archive/:id",
+  (req, _, next) => {
+    console.log("Incoming request Archiving:", req.params);
+    next();
+  },
+  authenticateToken,
+  authorizeRole("barangay_official"),
+  concernPost.archiveConcern
+)
 router.patch("/validate/:id",
   authenticateToken,
   authorizeRole("barangay_official"),

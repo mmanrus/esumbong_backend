@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma.js"
 import { transporter } from "../lib/email.js";
 const baseUrl = process.env.FRONTEND_URL;
+
 export const createConcern = async (data, categoryId, userId) => {
   const newConcern = await prisma.concern.create({
     data: {
@@ -12,7 +13,7 @@ export const createConcern = async (data, categoryId, userId) => {
       media: {
         create:
           data.files?.map((file) => ({
-            url: file.url,
+            url: `${process.env.BASE_URL}${file.url}`,
             type: file.type,
           })) || [],
       },
@@ -166,30 +167,83 @@ export const getConcernById = async (concernId) => {
   console.log("Fetched concern:", concern);
   return concern;
 };
+export const getAllConcerns = async ({ search, status, archived, validation }) => {
+  return prisma.concern.findMany({
+    where: {
+      AND: [
+        // 🔹 Validation filter
+        ["approved", "pending", "rejected"].includes(status)
+          ? { validation: status }
+          : {},
 
-export const getAllConcerns = async (filter) => {
-  return await prisma.concern.findMany({
-    where: filter || {},
+        // 🔹 Status filter
+        ["assigned", "resolved", "validated"].includes(status)
+          ? { status }
+          : {},
+
+        // 🔹 Search filter
+        search
+          ? {
+            OR: [
+              { title: { contains: search, mode: "insensitive" } },
+              { details: { contains: search, mode: "insensitive" } },
+              {
+                user: {
+                  fullname: { contains: search, mode: "insensitive" },
+                },
+              },
+              {
+                category: {
+                  name: { contains: search, mode: "insensitive" },
+                },
+              },
+            ],
+          }
+          : {},
+        archived !== undefined ? {
+          isArchived: archived
+        } : {},
+        validation !== undefined ? {
+          validation: validation
+        } : {},
+      ],
+    },
     select: {
       id: true,
       validation: true,
+      validatedBy: {
+        select: {
+          id: true,
+          fullname: true,
+        },
+      },
+      archivedOn: true,
       issuedAt: true,
+      title: true,
+      details: true,
+      status: true,
+      isArchived: true,
+      needsBarangayAssistance: true,
       user: {
         select: {
           id: true,
           fullname: true,
-        }
+        },
       },
       category: {
         select: {
           id: true,
-          name: true
-        }
+          name: true,
+        },
       },
       other: true,
-    }
+    },
+    orderBy: {
+      issuedAt: "desc",
+    },
   });
 };
+
 
 export const getResidentConcerns = async (userId) => {
   return await prisma.concern.findMany({
@@ -224,6 +278,7 @@ export const validateConcern = async (concernId, action, userId) => {
       validation: action,
       validatedById: userId,
       validatedAt: now,
+      status: "inProgress"
     },
     include: {
       user: true, // to get the resident
@@ -241,7 +296,7 @@ export const validateConcern = async (concernId, action, userId) => {
       itemId: updatedConcern.id,
       message,
       type: "concern",
-      userId: updatedConcern.userId, // resident who filed it
+      userId: updatedConcern.user.id, // resident who filed it
     },
   });
 
@@ -291,6 +346,26 @@ export const validateConcern = async (concernId, action, userId) => {
   return;
 };
 
+export const archiveConcern = async (concernId, userId) => {
+  const concern = await prisma.concern.findFirst({
+    where: {
+      id: concernId
+    },
+    select: {
+      isArchived: true
+    }
+  })
+  return await prisma.concern.update({
+    where: {
+      id: concernId
+    },
+    data: {
+      isArchived: !concern.isArchived,
+      ArchivedById: userId,
+      archivedOn: new Date()
+    }
+  })
+}
 
 export const getConcernUpdatesById = async (concernId) => {
   return await prisma.concernUpdate.findMany({
@@ -300,3 +375,93 @@ export const getConcernUpdatesById = async (concernId) => {
   })
 }
 
+export const deleteConcern = async (concernId, userId) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId
+    },
+    select: {
+      id: true,
+      fullname: true,
+      email: true,
+    }
+  })
+  const concern = await prisma.concern.findFirst({
+    where: { id: concernId },
+    select: {
+      id: true,
+      user: {
+        select: {
+          id: true,
+          fullname: true,
+          email: true,
+        }
+      }
+    }
+  })
+  const message = `Your concern "${concern.title}" has been deleted.`;
+
+  // 2️⃣ Notify the resident
+  await prisma.notification.create({
+    data: {
+      url: "",
+      message,
+      type: "concern",
+      userId: concern.user.id, // resident who filed it
+    },
+  });
+
+  await transporter.sendMail({
+    from: `"eSumbong" <${process.env.EMAIL_USER}>`,
+    to: concern.user.email,
+    subject: `Concern has been deleted: ${concern.title}`,
+    html: `
+      <p>Hello ${concern.user.fullname},</p>
+      <p>Your concern "${concern.title}" has been <strong>Deleted</strong>.</p>
+      <p>Deleted by: ${user.fullname} email: ${user.email}</p>
+      <p>Details: ${concern.details}</p>
+    `,
+  })
+
+  const officials = await prisma.user.findMany({
+    where: {
+      type: "barangay_official"
+    },
+    select: {
+      id: true,
+      email: true,
+      fullname: true,
+    }
+  })
+
+  await Promise.all(
+    officials.map(async (official) => {
+      await prisma.notification.create({
+        data: {
+          url,
+          itemId: concern.id,
+          message: `${concern.user.fullname}'s concern has been deleted by ${user.fullname === concern.user.fullname ? "the concern compliant" : user.fullname}.`,
+          type: "concern",
+          userId: official.id,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"eSumbong" <${process.env.EMAIL_USER}>`,
+        to: official.email,
+        subject: `Concern deletion: ${concern.title}`,
+        html: `
+          <p>Hello ${official.fullname},</p>
+          <p>The concern "${concern.title}" by ${concern.user.fullname} has been <strong>Deleted</strong>.</p>
+          <p>Deleted by: ${user.fullname === concern.user.fullname ? "the concern compliant" : user.fullname}.</p>
+        `,
+      });
+    })
+  )
+  await prisma.concern.delete({
+    where: {
+      id: concernId
+    }
+  })
+  return
+}
