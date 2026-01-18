@@ -52,7 +52,7 @@ export const updateConcernStatus = async (req, res) => {
     })
   }
   try {
-    const updatedConcern = await concernService.updateStatusConcern(
+    await concernService.updateStatusConcern(
       parseInt(userId),
       parseInt(concernId),
       { status, updateMessage }

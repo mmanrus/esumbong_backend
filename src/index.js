@@ -6,6 +6,8 @@ import notificationRouter from "./routes/notification.route.js";
 import userRouter from "./routes/user.routes.js";
 import concernRouter from "./routes/concern.route.js";
 import categoryRouter from "./routes/category.route.js";
+
+import announcementRouter from "./routes/announcement.route.js";
 import path from "path"
 import multer from "multer";
 import summonRouter from "./routes/summon.route.js";
@@ -36,12 +38,16 @@ app.use("/api/concern/", concernRouter);
 app.use("/api/category/", categoryRouter);
 app.use("/api/summon/", summonRouter);
 
-
 app.use("/api/notification/", notificationRouter);
 app.use((req, res, next) => {
   console.log("Request:", req.method, req.url);
   next();
 });
+
+
+app.use("/api/announcements/", announcementRouter);
+
+
 
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError || err.message.includes("Invalid file type")) {
@@ -114,6 +120,17 @@ app.listen(PORT, () => {
       const methods = Object.keys(route.methods).join(", ").toUpperCase();
       console.log(
         `- ${methods} http://localhost:${PORT}${basePath}summon${route.path}`
+      );
+    }
+  });
+   console.log("<<=========== Announcement Router =========>>");
+  announcementRouter.stack.forEach((layer) => {
+    // Check if the layer is a router and has a route
+    if (layer.route) {
+      const route = layer.route;
+      const methods = Object.keys(route.methods).join(", ").toUpperCase();
+      console.log(
+        `- ${methods} http://localhost:${PORT}${basePath}announcement${route.path}`
       );
     }
   });
