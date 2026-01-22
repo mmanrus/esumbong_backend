@@ -2,8 +2,9 @@ import * as announcementService from "../../services/announcement.service.js"
 
 
 export const getAllAnnouncements = async (req, res) => {
+    const userId = req.user?.userId
     try {
-        const announcements = await announcementService.getAllAnnouncements()
+        const announcements = await announcementService.getAllAnnouncements(parseInt(userId))
         return res.status(200).json(announcements)
     } catch (error) {
         console.error("Error fetching announcements:", error)
@@ -13,8 +14,9 @@ export const getAllAnnouncements = async (req, res) => {
 
 export const getAnnouncementById = async (req, res) => {
     const { id } = req.params
+    const userId = req.user?.userId
     try {
-        const announcement = await announcementService.getAnnouncementById(parseInt(id))
+        const announcement = await announcementService.getAnnouncementById(parseInt(id), parseInt(userId))
         if (!announcement) {
             res.status(404).json({ error: "Announcement not found" })
         }

@@ -73,8 +73,8 @@ model User {
 
   validatedConcerns Concern[] @relation("ValidatedConcern")
   archivedConcerns  Concern[] @relation("ArchivedConcern")
-  
-  userAnnouncement  Announcement[] @relation("UserAnnouncement")
+
+  userAnnouncement Announcement[] @relation("UserAnnouncement")
 }
 
 enum MediaType {
@@ -222,13 +222,14 @@ model SystemFeedback {
   user    User   @relation("UserSystemFeedback", references: [id], fields: [userId])
 }
 
-
 model Announcement {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String
-  userId    Int
-  user      User     @relation("UserAnnouncement",fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime?
+  id              Int       @id @default(autoincrement())
+  title           String
+  content         String
+  notifyOfficials Boolean   @default(false)
+  notifyResidents Boolean   @default(false)
+  userId          Int
+  user            User      @relation("UserAnnouncement", fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime?
 }

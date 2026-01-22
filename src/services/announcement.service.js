@@ -9,22 +9,44 @@ export const createAnnouncement = async (data, userId) => {
         data: {
             title: data.title,
             content: data.content,
-            userId: userId
+            userId: userId,
+            notifyResidents: data.notifyResidents,
+            notifyOfficials: data.notifyOfficials,
         }
     })
     const message = `New announcement posted: ${data.title}`
     const url = `${baseUrl}/announcements/${newAnnouncement.id}`;
-    const users = await prisma.user.findMany()
-    await Promise.all(users.map(async (user) => {
-        await prisma.notification.create({
-            data: {
-                url,
-                type: "announcement",
-                message,
-                userId: user.id
-            }
-        })
-    }))
+    const officials = await prisma.user.findMany({
+        where: { type: "barangay_official" }
+    })
+    const residents = await prisma.user.findMany({
+        where: { type: "resident" }
+    })
+    if (data.notifyResidents === true) {
+        await Promise.all(residents.map(async (resident) => {
+            await prisma.notification.create({
+                data: {
+                    url,
+                    type: "announcement",
+                    message,
+                    userId: resident.id
+                }
+            })
+        }))
+    }
+
+    if (data.notifyOfficials === true) {
+        await Promise.all(officials.map(async (user) => {
+            await prisma.notification.create({
+                data: {
+                    url,
+                    type: "announcement",
+                    message,
+                    userId: user.id
+                }
+            })
+        }))
+    }
 }
 
 
@@ -33,11 +55,13 @@ export const createAnnouncement = async (data, userId) => {
 export const updateAnnouncement = async (data, id, userId) => {
 
 
-    await prisma.createAnnouncement.update({
+    await prisma.announcement.update({
         where: { id },
         data: {
             title: data.title,
             content: data.content,
+            notifyResidents: data.notifyResidents,
+            notifyOfficials: data.notifyOfficials,
             userId: userId,
             updatedAt: new Date()
         }
@@ -49,14 +73,38 @@ export const deleteAnnouncement = async (id) => {
         where: { id }
     })
 }
-export const getAnnouncementById = async (id) => {
-    return await prisma.announcement.findUnique({
+export const getAnnouncementById = async (id, userId) => {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { type: true }
+    })
+    const announcement = await prisma.announcement.findUnique({
         where: { id }
     })
+    if (!announcement) {
+        throw new Error("Announcement not found");
+    }
+    if (
+        (user.type === "resident" && !announcement.notifyResidents) ||
+        (user.type === "official" && !announcement.notifyOfficials)
+    ) {
+        throw new Error("Announcement not accessible by this user")
+    }
+    return announcement
 }
 
-export const getAllAnnouncements = async () => {
-    return await prisma.announcement.findMany({
-        orderBy: { createdAt: "desc" }
-    })
-}
+
+export const getAllAnnouncements = async (userId) => {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { type: true },
+    });
+
+    return prisma.announcement.findMany({
+        orderBy: { createdAt: "desc" },
+        where:
+            user.type === "resident"
+                ? { notifyResidents: true }
+                : { notifyOfficials: true },
+    });
+};

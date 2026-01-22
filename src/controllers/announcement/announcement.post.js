@@ -1,15 +1,16 @@
 import * as announceService from "../../services/announcement.service.js"
 
 export const createAnnouncement = async (req, res) => {
-    const { title, content } = req.body
+    const { title, content, notifyResidents, notifyOfficials } = req.body
     const userId = req.user.userId
-
+    const notifyResidentsBool = notifyResidents === "true" ? true : false
+    const notifyOfficialsBool = notifyOfficials === "true" ? true : false
     if (!title || !content) {
         return res.status(400).json({ error: "Title and content are required" })
     }
 
     try {
-        await announceService.createAnnouncement({ title, content }, parseInt(userId))
+        await announceService.createAnnouncement({ title, content, notifyResidents: notifyResidentsBool, notifyOfficials: notifyOfficialsBool }, parseInt(userId))
         return res.status(201).json({ message: "Announcement created successfully" })
     } catch (error) {
         console.error("Error creating announcement:", error)

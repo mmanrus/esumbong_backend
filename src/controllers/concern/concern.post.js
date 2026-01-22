@@ -1,7 +1,7 @@
 import * as concernService from "../../services/concern.service.js";
 
 export const createConcern = async (req, res) => {
-  const { title, details, categoryId, other } = req.body;
+  const { title, details, needsBarangayAssistance, categoryId, other } = req.body;
   console.log("Creating concern with data:", req.body)
   const files = req.files.map((file) => ({
     url: `/uploads/concerns/${file.filename}`,
@@ -23,11 +23,12 @@ export const createConcern = async (req, res) => {
       error: "Title and details fields are required",
     });
   }
+  const barangayAssist = needsBarangayAssistance === "true" ? true : false
   const userId = req.user?.userId;
   const id = parseInt(categoryId)
   try {
     await concernService.createConcern(
-      { details, title, other, files },
+      { details, title, needsBarangayAssistance: barangayAssist, other, files },
       id,
       parseInt(userId)
     );
