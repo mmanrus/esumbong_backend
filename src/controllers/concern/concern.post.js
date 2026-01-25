@@ -103,8 +103,6 @@ export const archiveConcern = async (req, res) => {
 export const deleteConcern = async (req, res) => {
   const { id } = req.params
   const userId = req.user.userId
-
-  console.log("User id: ", userId)
   try {
     await concernService.deleteConcern(parseInt(id), parseInt(userId))
   } catch (error) {

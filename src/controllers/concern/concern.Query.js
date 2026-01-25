@@ -24,7 +24,6 @@ export const getConcernById = async (req, res) => {
 
 export const getConcernUpdatesById = async (req, res) => {
   const { id } = req.params
-  console.log("Fetching updates for concern ID:", id)
   try {
     const updates = await concernService.getConcernUpdatesById(parseInt(id))
     return res.status(200).json({

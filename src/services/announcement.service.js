@@ -52,9 +52,6 @@ export const createAnnouncement = async (data, userId) => {
 
 export const updateAnnouncement = async (data, id, userId) => {
 
-    console.log("Notifiy residents:", data.notifyResidents)
-
-    console.log("Notifiy notifyOfficials:", data.notifyOfficials)
     await prisma.announcement.update({
         where: { id },
         data: {
@@ -100,7 +97,6 @@ export const getAllAnnouncements = async (userId, sidebar = false) => {
         select: { type: true },
     });
 
-    console.log("User fetched:", user);
 
     if (!user) throw new Error("User not found");
 
@@ -108,7 +104,6 @@ export const getAllAnnouncements = async (userId, sidebar = false) => {
         ? { notifyResidents: true }
         : { notifyOfficials: true };
 
-    console.log("Where clause:", whereClause);
 
     const announcements = await prisma.announcement.findMany({
         orderBy: { createdAt: "desc" },
@@ -116,6 +111,5 @@ export const getAllAnnouncements = async (userId, sidebar = false) => {
         where: whereClause,
     });
 
-    console.log("Announcements found:", announcements.length);
     return announcements;
 };

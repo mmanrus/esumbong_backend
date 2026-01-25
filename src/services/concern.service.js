@@ -129,7 +129,6 @@ export const updateStatusConcern = async (userId, concernId, data) => {
 
 
 export const getConcernById = async (concernId) => {
-  console.log("Fetching concern with ID:", concernId);
   const concern = await prisma.concern.findFirst({
     where: {
       id: parseInt(concernId),
@@ -165,7 +164,6 @@ export const getConcernById = async (concernId) => {
       updatedAt: true,
     },
   });
-  console.log("Fetched concern:", concern);
   return concern;
 };
 export const getAllConcerns = async ({ search, status, archived, validation }) => {

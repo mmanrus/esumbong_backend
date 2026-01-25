@@ -1,7 +1,7 @@
 import * as CategoryService from "../../services/category.service.js";
 
 export const getAllCategoryController = async (_, res) => {
-  console.log("Getting all categories")
+ 
   try {
     const allCategory = await CategoryService.getAllCategory();
     

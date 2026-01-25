@@ -7,7 +7,7 @@ export const getAllAnnouncements = async (req, res) => {
     const isSidebar = sidebar === "true" ? true : false
     try {
         const announcements = await announcementService.getAllAnnouncements(parseInt(userId), isSidebar)
-        console.log("sending", announcements)
+   
         return res.status(200).json(announcements)
     } catch (error) {
         console.error("Error fetching announcements:", error)
