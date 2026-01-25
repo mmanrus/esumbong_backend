@@ -4,12 +4,13 @@ import * as userService from "../../services/user.service.js";
  * Retrieves a list of all users
  */
 export const getAllUsers = async (req, res) => {
+  const { search, type } = req.query
   try {
-    const users = await userService.getAllUsers();
-    res.status(200).json(users);
+    const users = await userService.getAllUsers({ search, type });
+    return res.status(200).json(users);
   } catch (error) {
     console.log("Error getting users", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: "An internal server error occured.",
     });
   }

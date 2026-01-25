@@ -7,8 +7,6 @@ const REFRESH_SECRET = process.env.REFRESH_SECRET;
 
 console.log("PRISMA CLIENT READY:", !!prisma);
 
-
-
 if (!JWT_SECRET || !REFRESH_SECRET) {
   throw new Error("JWT_SECRET and REFRESH_SECRET must be defined in environment variables");
 }
@@ -20,6 +18,17 @@ if (!JWT_SECRET || !REFRESH_SECRET) {
  */
 
 export const createUser = async (userData) => {
+  if (userData.email) {
+    const { email } = await prisma.user.findFirst({
+      where: { email: userData.email },
+      select: {
+        email: true
+      }
+    })
+    if (email) {
+      throw new Error("Email already taken.")
+    }
+  }
   const hashedPassword = await bcrypt.hash(userData.password, 10);
 
   const user = await prisma.user.create({
@@ -45,13 +54,16 @@ export const loginUser = async (email, password) => {
   password = password.trim();
 
   const user = await prisma.user.findUnique({ where: { email } });
+  if (user.isActive === false) {
+    throw new Error("You are restricted from using this account.")
+  }
   if (!user) {
-    return { success: false, message: "User not found" };
+    throw new Error("User not found.")
   }
 
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (!passwordMatch) {
-    return { success: false, message: "Incorrect password" };
+    throw new Error("Incorrect password.")
   }
 
   const access = jwt.sign(
@@ -78,13 +90,28 @@ export const loginUser = async (email, password) => {
  * @returns {Promise<array>} An array of user objects without password
  */
 
-export const getAllUsers = async () => {
+export const getAllUsers = async ({ search, type }) => {
   const users = await prisma.user.findMany({
+    where: {
+      AND: [
+        search ? {
+          OR: [
+            { fullname: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } }
+          ]
+        } : {},
+        type ? {
+          type: type
+        } : {}
+      ]
+    },
     select: {
       id: true,
       email: true,
       fullname: true,
+      contactNumber: true,
       type: true,
+      isActive: true,
     },
   });
 
@@ -119,16 +146,34 @@ export const getUserById = async (id) => {
  */
 export const updateUser = async (id, userData) => {
   const userToUpdate = { ...userData };
+
+  if (userData.email) {
+    const existingUser = await prisma.user.findFirst({
+      where: { email: userData.email },
+      select: { email: true },
+    });
+
+    if (existingUser) {
+      // Instead of throwing, return a custom error object
+      const err = new Error("Email already taken.");
+      err.code = "EMAIL_TAKEN";
+      throw err; // this is fine, but must catch correctly
+    }
+  }
+
   if (userData.password) {
     userToUpdate.password = await bcrypt.hash(userData.password, 10);
   }
+
   const updatedUser = await prisma.user.update({
     where: { id },
     data: userToUpdate,
   });
+
   const { password, ...userWithoutPassword } = updatedUser;
   return userWithoutPassword;
 };
+
 /**
  * @description
  * Query users from the database
@@ -182,8 +227,17 @@ export const refreshAccessToken = async (refresh_token) => {
  * @param {number} id - The user's ID.
  * @returns {Promise<object>} The deleted user object.
  */
-export const deleteUser = async (id) => {
-  return await prisma.user.delete({
+export const toggleUserActive = async (id) => {
+  const user = await prisma.user.findFirst({
+    where: { id: id },
+    select: {
+      isActive: true
+    }
+  })
+  return await prisma.user.update({
     where: { id },
+    data: {
+      isActive: !user.isActive
+    }
   });
 };

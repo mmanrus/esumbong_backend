@@ -3,8 +3,6 @@ import prisma from "../lib/prisma.js"
 const baseUrl = process.env.FRONTEND_URL;
 
 export const createAnnouncement = async (data, userId) => {
-
-
     const newAnnouncement = await prisma.announcement.create({
         data: {
             title: data.title,
@@ -54,7 +52,9 @@ export const createAnnouncement = async (data, userId) => {
 
 export const updateAnnouncement = async (data, id, userId) => {
 
+    console.log("Notifiy residents:", data.notifyResidents)
 
+    console.log("Notifiy notifyOfficials:", data.notifyOfficials)
     await prisma.announcement.update({
         where: { id },
         data: {
@@ -78,6 +78,7 @@ export const getAnnouncementById = async (id, userId) => {
         where: { id: userId },
         select: { type: true }
     })
+    if (!user) throw new Error("User not found");
     const announcement = await prisma.announcement.findUnique({
         where: { id }
     })
@@ -93,18 +94,28 @@ export const getAnnouncementById = async (id, userId) => {
     return announcement
 }
 
-
-export const getAllAnnouncements = async (userId) => {
+export const getAllAnnouncements = async (userId, sidebar = false) => {
     const user = await prisma.user.findUnique({
         where: { id: userId },
         select: { type: true },
     });
 
-    return prisma.announcement.findMany({
+    console.log("User fetched:", user);
+
+    if (!user) throw new Error("User not found");
+
+    const whereClause = user.type === "resident"
+        ? { notifyResidents: true }
+        : { notifyOfficials: true };
+
+    console.log("Where clause:", whereClause);
+
+    const announcements = await prisma.announcement.findMany({
         orderBy: { createdAt: "desc" },
-        where:
-            user.type === "resident"
-                ? { notifyResidents: true }
-                : { notifyOfficials: true },
+        take: sidebar ? 5 : undefined,
+        where: whereClause,
     });
+
+    console.log("Announcements found:", announcements.length);
+    return announcements;
 };

@@ -57,7 +57,8 @@ model User {
   contactNumber      String
   type               UserType         @default(admin)
   createAt           DateTime         @default(now())
-  verified           Boolean          @default(false)
+  isVerified         Boolean          @default(false)
+  isActive           Boolean          @default(true)
   // ERD
   // Resident Side
   residentConcern    Concern[]        @relation("ResidentReports")

@@ -6,7 +6,7 @@ import * as userService from "../../services/user.service.js";
  */
 export const createUser = async (req, res) => {
   const { email, password, fullname, type, address, contactNumber } = req.body;
-  if (!email || !password || !fullname||!address || !type || !contactNumber) {
+  if (!email || !password || !fullname || !address || !type || !contactNumber) {
     return res.status(400).json({
       error:
         "Missing required fields: email, password, fullname, username, and type",
@@ -54,35 +54,54 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password." });
     }
     // Authentication successful, return the user details (without the password)
-    res.status(200).json(user);
+    return res.status(200).json(user);
   } catch (error) {
     console.error("Error logging in user:", error);
-    res.status(500).json({ error: "An internal server error occurred." });
+    if (error.message === "You are restricted from using this account.") {
+      return res.status(403).json({ error: error.message })
+    }
+    if (error.message === "Incorrect password.") {
+      return res.status(401).json({ error: error.message })
+    }
+    if (error.message === "User not found.") {
+      return res.status(404).json({ error: error.message })
+    }
+    return res.status(500).json({ error: "An internal server error occurred." });
   }
 };
-
 export const updateUserById = async (req, res) => {
   const { id } = req.params;
-  const { email, password, fullname, role } = req.body;
+  const updateData = {};
+  const { email, contactNumber, password, fullname, role } = req.body;
+
+  if (email) updateData.email = email;
+  if (contactNumber) updateData.contactNumber = contactNumber;
+  if (fullname) updateData.fullname = fullname;
+  if (role) updateData.role = role;
+  if (password && password.trim() !== "") updateData.password = password;
+
+  if (Object.keys(updateData).length === 0) {
+    return res.status(400).json({ error: "No fields provided to update." });
+  }
 
   try {
-    const updateUser = await userService.updateUser(parseInt(id), {
-      email,
-      password,
-      fullname,
-      username,
-      role,
+    const updatedUser = await userService.updateUser(parseInt(id), updateData);
+    return res.status(200).json({
+      message: "User updated successfully",
+      user: updatedUser, // optional, send updated user back
     });
-    res.status(200).json(updateUser);
   } catch (error) {
-    if (error.code === "P2025") {
-      return res.status(404).json({
-        errror: "User not found.",
-      });
+    console.error("Error message", error);
+    console.log("Error.message", error.message)
+    if (error.message === "Email already taken.") {
+      return res.status(400).json({ error: "Email already taken." });
     }
-    res.status(500).json({
-      error: "An internal server error occurred.",
-    });
+
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    return res.status(500).json({ error: "An internal server error occurred." });
   }
 };
 
@@ -93,7 +112,7 @@ export const updateUserById = async (req, res) => {
 export const deleteUserById = async (req, res) => {
   const { id } = req.params;
   try {
-    await userService.deleteUser(parseInt(id));
+    await userService.toggleUserActive(parseInt(id));
     res.status(204).send();
   } catch (error) {
     console.error("Error deleting user:", error);
@@ -115,12 +134,31 @@ export const refreshAccessToken = async (req, res) => {
       return res.status(401).json({ error: "Refresh token is missing" });
     }
     const payload = await userService.refreshAccessToken();
-    res.status(200).json(payload);
+    return res.status(200).json(payload);
   } catch (error) {
     console.error("Error deleting user:", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: "An internal server error occured",
     });
   }
 };
 
+export const updateUser = async (req, res) => {
+  const { email, password, role, fullname } = req.body
+  const { id } = req.params
+
+  try {
+    await userService.updateUser(parseInt(id), {
+      email,
+      password,
+      role,
+      fullname
+    })
+    return res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return res.status(500).json({
+      error: "An internal server error occured",
+    });
+  }
+}

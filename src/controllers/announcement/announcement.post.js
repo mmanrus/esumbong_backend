@@ -3,8 +3,10 @@ import * as announceService from "../../services/announcement.service.js"
 export const createAnnouncement = async (req, res) => {
     const { title, content, notifyResidents, notifyOfficials } = req.body
     const userId = req.user.userId
-    const notifyResidentsBool = notifyResidents === "true" ? true : false
-    const notifyOfficialsBool = notifyOfficials === "true" ? true : false
+    const parseBool = (val) => val === true || val === "true";
+
+    const notifyResidentsBool = parseBool(notifyResidents);
+    const notifyOfficialsBool = parseBool(notifyOfficials);
     if (!title || !content) {
         return res.status(400).json({ error: "Title and content are required" })
     }

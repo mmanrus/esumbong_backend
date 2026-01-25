@@ -130,7 +130,7 @@ app.listen(PORT, () => {
       const route = layer.route;
       const methods = Object.keys(route.methods).join(", ").toUpperCase();
       console.log(
-        `- ${methods} http://localhost:${PORT}${basePath}announcement${route.path}`
+        `- ${methods} http://localhost:${PORT}${basePath}announcements${route.path}`
       );
     }
   });

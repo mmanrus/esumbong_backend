@@ -27,7 +27,7 @@ export const deleteCategoryController = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deleted = await CategoryService.deleteCategory(Number(id));
+    const deleted = await CategoryService.deleteCategory(parseInt(id));
     return res.status(200).json(deleted);
   } catch (error) {
     console.error("Error upon deleting category:", error);

@@ -161,6 +161,7 @@ export const getConcernById = async (concernId) => {
       validation: true,
       details: true,
       issuedAt: true,
+      needsBarangayAssistance: true,
       updatedAt: true,
     },
   });
