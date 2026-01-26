@@ -1,7 +1,6 @@
 
 import { Router } from "express";
 
-import serverless from "serverless-http";
 const router = new Router();
 
 import * as concernPost from "../controllers/concern/concern.post.js";

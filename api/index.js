@@ -1,5 +1,4 @@
 import serverless from "serverless-http";
-
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -26,6 +25,10 @@ app.use(cors({
 app.get("/api/", (req, res) => {
   res.json({ status: "ok", message: "Server is running!" });
 });
+app.get("/", (req, res) => {
+  res.json({ status: "ok", message: "Server is running!" });
+});
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -40,4 +43,6 @@ app.use("/api/notification/", notificationRouter);
 
 app.use("/api/announcements/", announcementRouter);
 
-export default serverless(app);
+
+// Export the serverless handler
+export const handler = serverless(app);
