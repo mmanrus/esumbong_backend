@@ -1,4 +1,4 @@
-import serverless from "serverless-http";
+
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -43,6 +43,8 @@ app.get("/", (req, res) => {
 
 //app.use("/api/announcements/", announcementRouter);
 
+const PORT = process.env.PORT || 3000;
 
-// Export the serverless handler
-export const handler = serverless(app);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Backend running on port ${PORT}`);
+});
