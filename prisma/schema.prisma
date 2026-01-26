@@ -81,6 +81,7 @@ model User {
 enum MediaType {
   photo
   video
+  file
 }
 
 model Concern {
@@ -122,10 +123,12 @@ model ConcernUpdate {
 }
 
 model Media {
-  id   Int       @id @default(autoincrement())
-  url  String
-  type MediaType
-
+  id         String    @id @default(cuid())
+  name       String?
+  url        String
+  type       MediaType
+  fileType   String?
+  fileSize   Int?
   summonId   Int?
   summmon    Summons?  @relation(fields: [summonId], references: [id])
   concernId  Int?

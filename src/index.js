@@ -6,10 +6,9 @@ import notificationRouter from "./routes/notification.route.js";
 import userRouter from "./routes/user.routes.js";
 import concernRouter from "./routes/concern.route.js";
 import categoryRouter from "./routes/category.route.js";
-
+import multer from "multer"
 import announcementRouter from "./routes/announcement.route.js";
 import path from "path"
-import multer from "multer";
 import summonRouter from "./routes/summon.route.js";
 import { startListener } from "./lib/notificationListener.js"
 console.log("DATABASE_URL:", process.env.DATABASE_URL_NEON);
@@ -45,10 +44,6 @@ app.use((req, res, next) => {
 });
 
 
-app.use("/api/announcements/", announcementRouter);
-
-
-
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError || err.message.includes("Invalid file type")) {
         return res.status(400).json({ message: err.message });
@@ -56,82 +51,13 @@ app.use((err, req, res, next) => {
     next(err);
 });
 
+app.use("/api/announcements/", announcementRouter);
+
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   console.log("JWT_SECRET from env:", JWT_SECRET);
   console.log("Endpoints:");
   const basePath = "/api/";
-
-  console.log("<<=========== User Router =========>>");
-  userRouter.stack.forEach((layer) => {
-    // Check if the layer is a router and has a route
-    if (layer.route) {
-      const route = layer.route;
-      const methods = Object.keys(route.methods).join(", ").toUpperCase();
-      console.log(
-        `- ${methods} http://localhost:${PORT}${basePath}users${route.path}`
-      );
-    }
-  });
-
-  console.log("<<=========== Concern Router =========>>");
-  concernRouter.stack.forEach((layer) => {
-    // Check if the layer is a router and has a route
-    if (layer.route) {
-      const route = layer.route;
-      const methods = Object.keys(route.methods).join(", ").toUpperCase();
-      console.log(
-        `- ${methods} http://localhost:${PORT}${basePath}concern${route.path}`
-      );
-    }
-  });
-
-  console.log("<<=========== Notification Router =========>>");
-  notificationRouter.stack.forEach((layer) => {
-    // Check if the layer is a router and has a route
-    if (layer.route) {
-      const route = layer.route;
-      const methods = Object.keys(route.methods).join(", ").toUpperCase();
-      console.log(
-        `- ${methods} http://localhost:${PORT}${basePath}notification${route.path}`
-      );
-    }
-  });
-
-  console.log("<<=========== Categpry Router =========>>");
-  categoryRouter.stack.forEach((layer) => {
-    // Check if the layer is a router and has a route
-    if (layer.route) {
-      const route = layer.route;
-      const methods = Object.keys(route.methods).join(", ").toUpperCase();
-      console.log(
-        `- ${methods} http://localhost:${PORT}${basePath}category${route.path}`
-      );
-    }
-  });
-  
-
-  console.log("<<=========== Summon Router =========>>");
-  summonRouter.stack.forEach((layer) => {
-    // Check if the layer is a router and has a route
-    if (layer.route) {
-      const route = layer.route;
-      const methods = Object.keys(route.methods).join(", ").toUpperCase();
-      console.log(
-        `- ${methods} http://localhost:${PORT}${basePath}summon${route.path}`
-      );
-    }
-  });
-   console.log("<<=========== Announcement Router =========>>");
-  announcementRouter.stack.forEach((layer) => {
-    // Check if the layer is a router and has a route
-    if (layer.route) {
-      const route = layer.route;
-      const methods = Object.keys(route.methods).join(", ").toUpperCase();
-      console.log(
-        `- ${methods} http://localhost:${PORT}${basePath}announcements${route.path}`
-      );
-    }
-  });
 });

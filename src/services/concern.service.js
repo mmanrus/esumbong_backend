@@ -10,11 +10,19 @@ export const createConcern = async (data, categoryId, userId) => {
       needsBarangayAssistance: data.needsBarangayAssistance,
       userId,
       ...(categoryId && { categoryId }),
+
       media: {
         create:
-          data.files?.map((file) => ({
-            url: `${process.env.BASE_URL}${file.url}`,
-            type: file.type,
+          data.media?.map((m) => ({
+            url: m.url,
+            name: m.name ?? null,
+            fileSize: m.size ?? null,
+            fileType: m.type ?? null,
+            type: m.type?.startsWith("image")
+              ? "photo"
+              : m.type?.startsWith("video")
+                ? "video"
+                : "file",
           })) || [],
       },
     },

@@ -1,6 +1,7 @@
-import multer from "multer";
-import path from "path";
+
 import { Router } from "express";
+
+import serverless from "serverless-http";
 const router = new Router();
 
 import * as concernPost from "../controllers/concern/concern.post.js";
@@ -11,29 +12,9 @@ import {
   authorizeUser,
 } from "../middleware/auth.middleware.js";
 
-// 📂 Configure Multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "./uploads/concerns"); // make sure this folder exists
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // unique filename
-  },
-});
+import multer from "multer";
 
-// 🧠 File filter (optional but recommended)
-const fileFilter = (req, file, cb) => {
-  const allowed = ["image/jpeg", "image/png", "video/mp4"];
-  if (allowed.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Invalid file type. Only JPEG, PNG, or MP4 allowed."));
-  }
-};
-
-// ✅ Initialize Multer
-const upload = multer({ storage, fileFilter });
-
+const upload = multer({ storage: multer.memoryStorage() });
 router.post(
   "/",
   (req, res, next) => {
@@ -42,7 +23,6 @@ router.post(
   },
   authenticateToken,
   authorizeRole("resident"),
-  upload.array("files", 5),
   concernPost.createConcern
 );
 
