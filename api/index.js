@@ -16,8 +16,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is Missing")
 }
-
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Add these middlewares BEFORE your routes
@@ -32,16 +30,16 @@ app.get("/", (req, res) => {
   res.json({ status: "ok", message: "Server is running!" });
 });
 
-app.use("/api/users/", userRouter);
+app.use("/api/users", userRouter);
 
-app.use("/api/concern/", concernRouter);
+app.use("/api/concern", concernRouter);
 
-app.use("/api/category/", categoryRouter);
-app.use("/api/summon/", summonRouter);
+app.use("/api/category", categoryRouter);
+app.use("/api/summon", summonRouter);
 
-app.use("/api/notification/", notificationRouter);
+app.use("/api/notification", notificationRouter);
 
-app.use("/api/announcements/", announcementRouter);
+app.use("/api/announcements", announcementRouter);
 
 const PORT = process.env.PORT || 3000;
 
