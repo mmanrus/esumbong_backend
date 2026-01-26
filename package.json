@@ -1,11 +1,11 @@
 {
   "name": "esumbong_backend",
-  "version": "1.0.0",
-  "main": "./src/index.js",
+  "version": "2.0.0",
+  "main": "./api/index.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon ./src/index.js",
+    "dev": "nodemon ./api/index.js",
     "postinstall": "prisma generate"
   },
   "keywords": [],
