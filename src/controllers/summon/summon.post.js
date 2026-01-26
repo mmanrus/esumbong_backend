@@ -4,7 +4,6 @@ import * as summonService from "../../services/summon.service.js"
 
 export const summonResident = async (req, res) => {
     const { id } = req.params
-    console.log("Summon concern id:", id)
     const { date, residentId, startTime, endTime, files } = req.body
     const userId = req.user.userId
     if (!date || !residentId ||  !startTime ) {

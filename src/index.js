@@ -6,7 +6,6 @@ import notificationRouter from "./routes/notification.route.js";
 import userRouter from "./routes/user.routes.js";
 import concernRouter from "./routes/concern.route.js";
 import categoryRouter from "./routes/category.route.js";
-//import multer from "multer"
 import announcementRouter from "./routes/announcement.route.js";
 
 import summonRouter from "./routes/summon.route.js";
@@ -32,10 +31,7 @@ app.use("/api/category/", categoryRouter);
 app.use("/api/summon/", summonRouter);
 
 app.use("/api/notification/", notificationRouter);
-app.use((req, res, next) => {
-  console.log("Request:", req.method, req.url);
-  next();
-});
+
 app.use("/api/announcements/", announcementRouter);
 
 export default app;

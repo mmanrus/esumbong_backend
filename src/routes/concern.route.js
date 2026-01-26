@@ -14,10 +14,6 @@ import {
 
 router.post(
   "/",
-  (req, res, next) => {
-    console.log("Incoming request:", req.body);
-    next();
-  },
   authenticateToken,
   authorizeRole("resident"),
   concernPost.createConcern
@@ -25,10 +21,6 @@ router.post(
 
 router.delete(
   "/:id",
-  (req, res, next) => {
-    console.log("Incoming request Deleting Concern:", req.params);
-    next();
-  },
   authenticateToken,
   authorizeRole(["resident", "barangay_official"]),
   concernPost.deleteConcern
@@ -42,18 +34,10 @@ router.get("/",
 
 router.get(
   "/:id",
-  (req, _, next) => {
-    console.log("Incoming request:", req.params);
-    next();
-  },
   authenticateToken,
   concernQuery.getConcernById
 );
 router.patch("/archive/:id",
-  (req, _, next) => {
-    console.log("Incoming request Archiving:", req.params);
-    next();
-  },
   authenticateToken,
   authorizeRole("barangay_official"),
   concernPost.archiveConcern

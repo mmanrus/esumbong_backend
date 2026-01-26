@@ -1,9 +1,7 @@
 import * as announceService from "../../services/announcement.service.js"
 
 export const createAnnouncement = async (req, res) => {
-    console.log("Headers:", req.headers["content-type"]);
-    console.log("Body:", req.body);
-    const { title, content, notifyResidents, notifyOfficials } = req.body
+     const { title, content, notifyResidents, notifyOfficials } = req.body
     const userId = req.user.userId
     const parseBool = (val) => val === true || val === "true";
 

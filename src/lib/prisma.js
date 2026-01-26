@@ -7,8 +7,6 @@ const { PrismaClient } = pkg;
 import ws from 'ws';
 neonConfig.webSocketConstructor = ws;
 
-console.log("DATABASE_URL_NEON from prisma.js:", process.env.DATABASE_URL_NEON);
-
 const connectionString = process.env.DATABASE_URL_NEON
 
 const adapter = new PrismaNeon({ connectionString });

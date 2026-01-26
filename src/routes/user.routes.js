@@ -16,20 +16,12 @@ router.use(cookieParser());
 
 router.post(
   "/login",
-  (req, res, next) => {
-    console.log("Incoming request:", req.body);
-    next();
-  },
   userController.loginUser
 );
 
 // User Registration
 router.post(
   "/",
-  (req, res, next) => {
-    console.log("Incoming request:", req.body);
-    next();
-  },
   userController.createUser
 );
 

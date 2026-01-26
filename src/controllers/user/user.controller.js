@@ -92,7 +92,7 @@ export const updateUserById = async (req, res) => {
     });
   } catch (error) {
     console.error("Error message", error);
-    console.log("Error.message", error.message)
+    console.error("Error.message", error.message)
     if (error.message === "Email already taken.") {
       return res.status(400).json({ error: "Email already taken." });
     }

@@ -12,10 +12,6 @@ import {
 
 router.post(
     "/:id",
-    (req, res, next) => {
-        console.log("Incoming Summon request:", req.body);
-        next();
-    },
     authenticateToken,
     authorizeRole("barangay_official"),
     summonPost.summonResident

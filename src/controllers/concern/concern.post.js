@@ -1,8 +1,6 @@
 import * as concernService from "../../services/concern.service.js";
 
 export const createConcern = async (req, res) => {
-  console.log("Headers:", req.headers["content-type"]);
-  console.log("Body:", req.body);
   const {
     title,
     details,
@@ -12,7 +10,6 @@ export const createConcern = async (req, res) => {
     media
   } = req.body;
 
-  console.log("Media:", media);
 
   /* ───────────── Validation ───────────── */
   if (!title || !details) {

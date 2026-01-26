@@ -9,7 +9,7 @@ export const getAllUsers = async (req, res) => {
     const users = await userService.getAllUsers({ search, type });
     return res.status(200).json(users);
   } catch (error) {
-    console.log("Error getting users", error);
+    console.error("Error getting users", error);
     return res.status(500).json({
       error: "An internal server error occured.",
     });
