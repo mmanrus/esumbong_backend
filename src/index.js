@@ -18,20 +18,20 @@ if (!JWT_SECRET) {
 
 // Add these middlewares BEFORE your routes
 app.use(cors({
-  origin: `${process.env.FRONTEND_URL}`,
+  origin: process.env.FRONTEND_URL,
   credentials: true,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/users/", userRouter);
+app.use("/users/", userRouter);
 
-app.use("/api/concern/", concernRouter);
+app.use("/concern/", concernRouter);
 
-app.use("/api/category/", categoryRouter);
-app.use("/api/summon/", summonRouter);
+app.use("/category/", categoryRouter);
+app.use("/summon/", summonRouter);
 
-app.use("/api/notification/", notificationRouter);
+app.use("/notification/", notificationRouter);
 
-app.use("/api/announcements/", announcementRouter);
+app.use("/announcements/", announcementRouter);
 
 export default app;
