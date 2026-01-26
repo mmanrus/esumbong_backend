@@ -12,9 +12,6 @@ import {
   authorizeUser,
 } from "../middleware/auth.middleware.js";
 
-import multer from "multer";
-
-const upload = multer({ storage: multer.memoryStorage() });
 router.post(
   "/",
   (req, res, next) => {

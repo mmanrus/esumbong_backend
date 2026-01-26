@@ -10,9 +10,6 @@ import categoryRouter from "./routes/category.route.js";
 import announcementRouter from "./routes/announcement.route.js";
 
 import summonRouter from "./routes/summon.route.js";
-//import { startListener } from "./lib/notificationListener.js"
-
-//await startListener()
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET;
