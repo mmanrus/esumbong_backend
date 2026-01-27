@@ -26,10 +26,10 @@ export const getMe = async (req, res) => {
         error: "User not found",
       });
     }
-    res.status(200).json(user);
+    return res.status(200).json(user);
   } catch (error) {
     console.error("Error getting user by Id:", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: "An internal server error has occured",
     });
   }

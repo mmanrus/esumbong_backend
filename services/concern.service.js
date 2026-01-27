@@ -148,6 +148,7 @@ export const getConcernById = async (concernId) => {
         select: {
           id: true,
           fullname: true,
+          contactNumber: true,
           email: true,
           type: true,
         },

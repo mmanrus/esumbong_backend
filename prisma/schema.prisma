@@ -74,7 +74,6 @@ model User {
 
   validatedConcerns Concern[] @relation("ValidatedConcern")
   archivedConcerns  Concern[] @relation("ArchivedConcern")
-
   userAnnouncement Announcement[] @relation("UserAnnouncement")
 }
 
@@ -149,7 +148,7 @@ model Feedback {
   id               Int             @id @default(autoincrement())
   title            String
   issuedAt         DateTime        @default(now())
-  updatedAt        DateTime?
+  updatedAt        DateTime?       @updatedAt
   //Relationships
   authorId         Int
   author           User            @relation("UserFeedbacks", fields: [authorId], references: [id])
@@ -178,7 +177,7 @@ model Summons {
   startTime  DateTime?
   endTime    DateTime?
   issuedAt   DateTime       @default(now())
-  updatedAt  DateTime?
+  updatedAt  DateTime?      @updatedAt
   media      Media[]
   // Resident who received summons
   // Official who issued summons
@@ -204,7 +203,7 @@ model Mediation {
 
   outcome   String
   schedule  DateTime
-  updatedAt DateTime?
+  updatedAt DateTime? @updatedAt
 }
 
 model Notification {
@@ -235,5 +234,5 @@ model Announcement {
   userId          Int
   user            User      @relation("UserAnnouncement", fields: [userId], references: [id])
   createdAt       DateTime  @default(now())
-  updatedAt       DateTime?
+  updatedAt       DateTime? @updatedAt
 }

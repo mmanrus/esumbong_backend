@@ -17,13 +17,13 @@ if (!JWT_SECRET || !REFRESH_SECRET) {
 
 export const createUser = async (userData) => {
   if (userData.email) {
-    const { email } = await prisma.user.findFirst({
+    const existingUser = await prisma.user.findFirst({
       where: { email: userData.email },
       select: {
         email: true
       }
     })
-    if (email) {
+    if (existingUser?.email) {
       throw new Error("Email already taken.")
     }
   }
