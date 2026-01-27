@@ -1,4 +1,5 @@
 
+import { AppError } from "../lib/error.js";
 import prisma from "../lib/prisma.js"
 const baseUrl = process.env.FRONTEND_URL;
 
@@ -80,13 +81,13 @@ export const getAnnouncementById = async (id, userId) => {
         where: { id }
     })
     if (!announcement) {
-        throw new Error("Announcement not found");
+        throw new AppError("Announcement not found", 404);
     }
     if (
         (user.type === "resident" && !announcement.notifyResidents) ||
         (user.type === "official" && !announcement.notifyOfficials)
     ) {
-        throw new Error("Announcement not accessible by this user")
+        throw new AppError("Announcement not accessible by this user", 403)
     }
     return announcement
 }

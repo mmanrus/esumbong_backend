@@ -19,10 +19,14 @@ if (!JWT_SECRET) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Add these middlewares BEFORE your routes
-app.use(cors({
+const corsOptions  = process.env.NODE_ENV === "production" ? {
   origin: process.env.FRONTEND_URL,
   credentials: true,
-}));
+} : {
+  origin: "http://localhost:3000", // your dev frontend
+  credentials: true,
+}
+app.use(cors(corsOptions ));
 app.get("/api/", (req, res) => {
   res.json({ status: "ok", message: "Server is running!" });
 });

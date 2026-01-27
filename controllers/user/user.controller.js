@@ -47,7 +47,9 @@ export const loginUser = async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required." });
   }
-
+  if (process.env.NODE === "DEV") {
+    console.log("Log in user: hello ", email, password)
+  }
   try {
     const user = await userService.loginUser(email, password);
     if (!user) {

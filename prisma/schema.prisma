@@ -106,7 +106,7 @@ model Concern {
   status                  ConcernStatus   @default(pending)
   userId                  Int
   user                    User            @relation("ResidentReports", fields: [userId], references: [id])
-  updatedAt               DateTime?
+  updatedAt               DateTime?       @updatedAt
   issuedAt                DateTime        @default(now())
   updates                 ConcernUpdate[] @relation("ConcernUpdates")
   Summons                 Summons[]       @relation("ConcernSummon")

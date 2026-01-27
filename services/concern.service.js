@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma.js"
+import { AppError } from "../lib/error.js";
 import { transporter } from "../lib/email.js";
 const baseUrl = process.env.FRONTEND_URL;
 
@@ -91,7 +92,7 @@ export const updateStatusConcern = async (userId, concernId, data) => {
     },
   });
   if (user?.type !== "barangay_officials") {
-    throw new Error("Unauthorized");
+    throw new AppError("Unauthorized", 401)
   }
   const updatedConcern = await prisma.concern.update({
     where: {
@@ -253,10 +254,21 @@ export const getAllConcerns = async ({ search, status, archived, validation }) =
 
 
 export const getResidentConcerns = async (userId) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId
+    }
+  })
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
   return await prisma.concern.findMany({
     where: {
-      userId,
+      userId: userId,
     },
+    orderBy: {
+      updatedAt: 'desc'
+    }
   });
 };
 

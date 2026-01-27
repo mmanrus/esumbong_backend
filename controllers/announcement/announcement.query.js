@@ -7,7 +7,7 @@ export const getAllAnnouncements = async (req, res) => {
     const isSidebar = sidebar === "true" ? true : false
     try {
         const announcements = await announcementService.getAllAnnouncements(parseInt(userId), isSidebar)
-   
+
         return res.status(200).json(announcements)
     } catch (error) {
         console.error("Error fetching announcements:", error)
@@ -25,7 +25,13 @@ export const getAnnouncementById = async (req, res) => {
         }
         return res.status(200).json(announcement)
     } catch (error) {
-        console.error(`Error fetching announcement:${id}`, error)
+        if (process.env.NODE_ENV === "development") {
+
+            console.error(`Error fetching announcement:${id}`, error)
+        }
+        if (error.name === "AppError") {
+            return res.status(error.status).json({ error: error.message })
+        }
         return res.status(500).json({ error: "An error occurred while fetching the announcement." })
     }
 }

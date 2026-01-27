@@ -52,4 +52,6 @@ router.get("/updates/:id",
   concernQuery.getConcernUpdatesById
 )
 
+router.get("/user/:id", authenticateToken,
+   concernQuery.getConcernsByUserId)
 export default router;

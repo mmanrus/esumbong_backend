@@ -54,3 +54,24 @@ export const getAllConcern = async (req, res) => {
       .json({ error: "An error occurred while fetching all the concern." });
   }
 }
+
+export const getConcernsByUserId = async (req, res) => {
+  const userId = Number(req.user?.userId)
+
+  try {
+    const concerns = await concernService.getResidentConcerns(userId)
+    return res.status(200).json({ data: concerns })
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error upun getting concerns by userID:", error)
+    }
+    if (error.name === "AppError") {
+      return res.status(error.statusCode).json({
+        error: error.message
+      })
+    }
+    return res.status(500).json({
+      error: "Unexpected server error has occured."
+    })
+  }
+}

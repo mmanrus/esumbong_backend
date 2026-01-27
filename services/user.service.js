@@ -50,7 +50,7 @@ export const createUser = async (userData) => {
 export const loginUser = async (email, password) => {
   email = email.trim();
   password = password.trim();
-
+  console.log("Login service")
   const user = await prisma.user.findUnique({ where: { email } });
   if (user.isActive === false) {
     throw new Error("You are restricted from using this account.")
@@ -63,7 +63,7 @@ export const loginUser = async (email, password) => {
   if (!passwordMatch) {
     throw new Error("Incorrect password.")
   }
-
+  console.log("give jwt")
   const access = jwt.sign(
     { userId: user.id, type: user.type }, // store 'type' to match middleware
     JWT_SECRET,
