@@ -52,9 +52,7 @@ export const loginUser = async (email, password) => {
   password = password.trim();
   console.log("Login service")
   const user = await prisma.user.findUnique({ where: { email } });
-  if (user.isActive === false) {
-    throw new Error("You are restricted from using this account.")
-  }
+  
   if (!user) {
     throw new Error("User not found.")
   }
