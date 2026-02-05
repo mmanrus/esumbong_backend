@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start" : "node ./api/index.js",
+    "start": "node ./api/index.js",
     "dev": "nodemon ./api/index.js",
     "postinstall": "prisma generate"
   },
@@ -33,6 +33,7 @@
     "nodemailer": "^7.0.12",
     "pg": "^8.16.3",
     "postgres": "^3.4.7",
+    "resend": "^6.9.1",
     "serverless-http": "^4.0.0",
     "ws": "^8.18.3"
   }

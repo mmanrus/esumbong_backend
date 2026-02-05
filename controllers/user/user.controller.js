@@ -6,7 +6,7 @@ import * as userService from "../../services/user.service.js";
  */
 export const createUser = async (req, res) => {
   const { email, password, fullname, type, address, contactNumber } = req.body;
-  
+
   if (!email || !password || !fullname || !address || !type || !contactNumber) {
     return res.status(400).json({
       error:
@@ -45,10 +45,14 @@ export const createUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
+  console.log("Log in user: hello ", email, password)
+  if (process.env.NODE === "development") {
+    console.log("Log in user: hello ", email, password)
+  }
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required." });
   }
-  if (process.env.NODE === "DEV") {
+  if (process.env.NODE === "development") {
     console.log("Log in user: hello ", email, password)
   }
   try {

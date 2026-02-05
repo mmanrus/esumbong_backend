@@ -52,11 +52,16 @@ export const loginUser = async (email, password) => {
   password = password.trim();
   console.log("Login service")
   const user = await prisma.user.findUnique({ where: { email } });
-  
+  if (process.env.NODE_ENV !== "production") {
+    console.log("User found:", user);
+    console.log("Loging attempt", { email, password });
+  }
   if (!user) {
     throw new Error("User not found.")
   }
-
+  if (user.isActive === false) {
+    throw new Error("You are restricted from using this account.")
+  }
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (!passwordMatch) {
     throw new Error("Incorrect password.")

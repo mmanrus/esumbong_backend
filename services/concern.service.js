@@ -1,6 +1,6 @@
 import prisma from "../lib/prisma.js"
 import { AppError } from "../lib/error.js";
-import { transporter } from "../lib/email.js";
+import { sendConcernEmail } from "../lib/email.js";
 const baseUrl = process.env.FRONTEND_URL;
 
 export const createConcern = async (data, categoryId, userId) => {
@@ -55,28 +55,18 @@ export const createConcern = async (data, categoryId, userId) => {
           userId: official.id,
         },
       });
-      await transporter.sendMail({
-        from: `eSumbong" <${process.env.EMAIL_USER}>`,
-        to: official.email,
-        subject: `${data.title}`,
-        html: `
-          <p>Hello ${official.fullname}</p>
-          <p>${data.details}</p>
-         ${data.files?.length
-            ? `<p>Attachments:</p>
-           <ul>
-             ${data.files
-              .map(
-                (file) =>
-                  `<li><a href="${file.url}" target="_blank">${file.type}</a></li>`
-              )
-              .join("")}
-           </ul>`
-            : ""
-          }
-          <a href="${url}">View Concern</>
-        `,
-      });
+      if (!process.env.RESEND_API_KEY) return; // Skip email if API key is not set
+      await sendConcernEmail(
+        official.email,
+        official.fullname,
+        data.title,
+        "filed",
+        data.details,
+        url,
+        data.files
+      );
+
+
     })
   );
   return newConcern;
@@ -319,18 +309,17 @@ export const validateConcern = async (concernId, action, userId) => {
       userId: updatedConcern.user.id, // resident who filed it
     },
   });
+  if (!process.env.RESEND_API_KEY) return; // Skip email if API key is not set
+  await sendConcernEmail(
+    updatedConcern.user.email,  // to
+    updatedConcern.user.fullname, // fullname
+    updatedConcern.title,        // title
+    action,                      // action (e.g., "approved", "rejected")
+    updatedConcern.details,      // details
+    url                           // link to concern
+  );
 
-  await transporter.sendMail({
-    from: `"eSumbong" <${process.env.EMAIL_USER}>`,
-    to: updatedConcern.user.email,
-    subject: `Concern ${action}: ${updatedConcern.title}`,
-    html: `
-      <p>Hello ${updatedConcern.user.fullname},</p>
-      <p>Your concern "${updatedConcern.title}" has been <strong>${action}</strong>.</p>
-      <p>Details: ${updatedConcern.details}</p>
-      <a href="${url}">View Concern</a>
-    `,
-  });
+
 
   // 3️⃣ Notify all barangay officials (similar to createConcern)
   const officials = await prisma.user.findMany({
@@ -348,18 +337,16 @@ export const validateConcern = async (concernId, action, userId) => {
           userId: official.id,
         },
       });
+      if (!process.env.RESEND_API_KEY) return; // Skip email if API key is not set
+      await sendConcernEmail(
+        official.email,             // to
+        official.fullname,          // fullname
+        updatedConcern.title,       // title
+        action,                     // action (e.g., "approved", "rejected")
+        updatedConcern.details,     // details
+        url                         // link to concern
+      );
 
-      await transporter.sendMail({
-        from: `"eSumbong" <${process.env.EMAIL_USER}>`,
-        to: official.email,
-        subject: `Concern ${action}: ${updatedConcern.title}`,
-        html: `
-          <p>Hello ${official.fullname},</p>
-          <p>The concern "${updatedConcern.title}" by ${updatedConcern.user.fullname} has been <strong>${action}</strong>.</p>
-          <p>Details: ${updatedConcern.details}</p>
-          <a href="${url}">View Concern</a>
-        `,
-      });
     })
   );
 
@@ -431,18 +418,6 @@ export const deleteConcern = async (concernId, userId) => {
     },
   });
 
-  await transporter.sendMail({
-    from: `"eSumbong" <${process.env.EMAIL_USER}>`,
-    to: concern.user.email,
-    subject: `Concern has been deleted: ${concern.title}`,
-    html: `
-      <p>Hello ${concern.user.fullname},</p>
-      <p>Your concern "${concern.title}" has been <strong>Deleted</strong>.</p>
-      <p>Deleted by: ${user.fullname} email: ${user.email}</p>
-      <p>Details: ${concern.details}</p>
-    `,
-  })
-
   const officials = await prisma.user.findMany({
     where: {
       type: "barangay_official"
@@ -466,16 +441,6 @@ export const deleteConcern = async (concernId, userId) => {
         },
       });
 
-      await transporter.sendMail({
-        from: `"eSumbong" <${process.env.EMAIL_USER}>`,
-        to: official.email,
-        subject: `Concern deletion: ${concern.title}`,
-        html: `
-          <p>Hello ${official.fullname},</p>
-          <p>The concern "${concern.title}" by ${concern.user.fullname} has been <strong>Deleted</strong>.</p>
-          <p>Deleted by: ${user.fullname === concern.user.fullname ? "the concern compliant" : user.fullname}.</p>
-        `,
-      });
     })
   )
   await prisma.concern.delete({
