@@ -4,7 +4,7 @@ export const getConcernById = async (req, res) => {
   const { id } = req.params;
   const concernId = parseInt(id)
   if (!concernId) {
-    return res.status(400).json({ error: "Invalid or missisng concern id" });
+    return res.status(400).json({ error: "Invalid or missisng concern id hellow" });
   }
   try {
     const concern = await concernService.getConcernById(concernId);
@@ -39,11 +39,12 @@ export const getConcernUpdatesById = async (req, res) => {
 }
 
 export const getAllConcern = async (req, res) => {
-  const { search, status, archived, validation } = req.query
+  const { search, status, archived, validation, recent } = req.query
+  const recentFilter = recent === "true" ? true : recent === "false" ? false : undefined
   const archivedFilter = archived === "true" ? true : archived === "false" ? false : undefined
   const validationFilter = validation === "true" ? true : validation === "false" ? false : undefined
   try {
-    const concerns = await concernService.getAllConcerns({ search, status, archived: archivedFilter, validation: validationFilter })
+    const concerns = await concernService.getAllConcerns({ search, status, archived: archivedFilter, validation: validationFilter, recent: recentFilter })
     return res.status(200).json({
       data: concerns
     })
@@ -69,6 +70,22 @@ export const getConcernsByUserId = async (req, res) => {
       return res.status(error.statusCode).json({
         error: error.message
       })
+    }
+    return res.status(500).json({
+      error: "Unexpected server error has occured."
+    })
+  }
+}
+
+export const getConcernHistory = async (req, res) => {
+  console.log("Getting concern history for user:", req.user)
+  const userId = Number(req.user?.userId)
+  try {
+    const history = await concernService.getUpdatedConcerns(userId)
+    return res.status(200).json({ data: history })
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error upon getting concern history:", error)
     }
     return res.status(500).json({
       error: "Unexpected server error has occured."

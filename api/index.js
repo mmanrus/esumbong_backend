@@ -2,6 +2,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import listEndpoints from "express-list-endpoints";
 //! ROUTES
 import notificationRouter from "../routes/notification.route.js";
 import userRouter from "../routes/user.routes.js";
@@ -19,14 +20,11 @@ if (!JWT_SECRET) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Add these middlewares BEFORE your routes
-const corsOptions  = process.env.NODE_ENV === "production" ? {
+const corsOptions = process.env.NODE_ENV === "production" ? {
   origin: process.env.FRONTEND_URL,
   credentials: true,
-} : {
-  origin: "http://localhost:3000", // your dev frontend
-  credentials: true,
-}
-app.use(cors(corsOptions ));
+} : {}
+app.use(cors(corsOptions));
 app.get("/api/", (req, res) => {
   res.json({ status: "ok", message: "Server is running!" });
 });
@@ -44,9 +42,25 @@ app.use("/api/summon", summonRouter);
 app.use("/api/notification", notificationRouter);
 
 app.use("/api/announcements", announcementRouter);
-
+if (process.env.NODE_ENV === "development") {
+  app.use((req, res, next) => {
+    console.log(`➡️  ${req.method} ${req.originalUrl}`);
+    next();
+  });
+}
 const PORT = process.env.PORT || 3000;
+if (process.env.NODE_ENV === "development") {
+  console.log("\n📌 Concern Router endpoints:");
+  console.table(listEndpoints(concernRouter));
+
+  console.log("\n📌 User Router endpoints:");
+  console.table(listEndpoints(userRouter));
+
+  console.log("\n📌 Notification Router endpoints:");
+  console.table(listEndpoints(notificationRouter));
+}
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Backend running on port ${PORT}`);
 });
+

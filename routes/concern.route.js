@@ -11,31 +11,7 @@ import {
   authorizeUser,
 } from "../middleware/auth.middleware.js";
 
-router.post(
-  "/",
-  authenticateToken,
-  authorizeRole("resident"),
-  concernPost.createConcern
-);
 
-router.delete(
-  "/:id",
-  authenticateToken,
-  authorizeRole(["resident", "barangay_official"]),
-  concernPost.deleteConcern
-)
-
-router.get("/",
-  authenticateToken,
-  authorizeRole("barangay_official"),
-  concernQuery.getAllConcern
-)
-
-router.get(
-  "/:id",
-  authenticateToken,
-  concernQuery.getConcernById
-);
 router.patch("/archive/:id",
   authenticateToken,
   authorizeRole("barangay_official"),
@@ -51,7 +27,39 @@ router.get("/updates/:id",
   authenticateToken,
   concernQuery.getConcernUpdatesById
 )
+router.get("/history",
+  authenticateToken,
+  concernQuery.getConcernHistory
+)
+
+router.post(
+  "/",
+  authenticateToken,
+  authorizeRole("resident"),
+  concernPost.createConcern
+);
+
+
+
+router.get("/",
+  authenticateToken,
+  authorizeRole("barangay_official"),
+  concernQuery.getAllConcern
+)
+
+router.get(
+  "/:id",
+  authenticateToken,
+  concernQuery.getConcernById
+);
+
+router.delete(
+  "/:id",
+  authenticateToken,
+  authorizeRole(["resident", "barangay_official"]),
+  concernPost.deleteConcern
+)
 
 router.get("/user/:id", authenticateToken,
-   concernQuery.getConcernsByUserId)
+  concernQuery.getConcernsByUserId)
 export default router;

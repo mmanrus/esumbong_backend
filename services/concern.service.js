@@ -157,6 +157,8 @@ export const getConcernById = async (concernId) => {
           type: true,
         },
       },
+      other: true,
+      status: true,
       validation: true,
       details: true,
       issuedAt: true,
@@ -166,7 +168,7 @@ export const getConcernById = async (concernId) => {
   });
   return concern;
 };
-export const getAllConcerns = async ({ search, status, archived, validation }) => {
+export const getAllConcerns = async ({ search, status, archived, validation, recent }) => {
   return prisma.concern.findMany({
     where: {
       AND: [
@@ -179,6 +181,9 @@ export const getAllConcerns = async ({ search, status, archived, validation }) =
         ["assigned", "resolved", "validated"].includes(status)
           ? { status }
           : {},
+
+        // 🔹 Recent filter
+        recent !== undefined ? { updatedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } : {},
 
         // 🔹 Search filter
         search
@@ -309,15 +314,16 @@ export const validateConcern = async (concernId, action, userId) => {
       userId: updatedConcern.user.id, // resident who filed it
     },
   });
-  if (!process.env.RESEND_API_KEY) return; // Skip email if API key is not set
-  await sendConcernEmail(
-    updatedConcern.user.email,  // to
-    updatedConcern.user.fullname, // fullname
-    updatedConcern.title,        // title
-    action,                      // action (e.g., "approved", "rejected")
-    updatedConcern.details,      // details
-    url                           // link to concern
-  );
+  if (process.env.RESEND_API_KEY) {
+    await sendConcernEmail(
+      updatedConcern.user.email,  // to
+      updatedConcern.user.fullname, // fullname
+      updatedConcern.title,        // title
+      action,                      // action (e.g., "approved", "rejected")
+      updatedConcern.details,      // details
+      url                           // link to concern
+    );
+  }
 
 
 
@@ -337,16 +343,16 @@ export const validateConcern = async (concernId, action, userId) => {
           userId: official.id,
         },
       });
-      if (!process.env.RESEND_API_KEY) return; // Skip email if API key is not set
-      await sendConcernEmail(
-        official.email,             // to
-        official.fullname,          // fullname
-        updatedConcern.title,       // title
-        action,                     // action (e.g., "approved", "rejected")
-        updatedConcern.details,     // details
-        url                         // link to concern
-      );
-
+      if (process.env.RESEND_API_KEY) {
+        await sendConcernEmail(
+          official.email,             // to
+          official.fullname,          // fullname
+          updatedConcern.title,       // title
+          action,                     // action (e.g., "approved", "rejected")
+          updatedConcern.details,     // details
+          url                         // link to concern
+        );
+      }
     })
   );
 
@@ -449,4 +455,46 @@ export const deleteConcern = async (concernId, userId) => {
     }
   })
   return
+}
+
+
+export const getUpdatedConcerns = async (userId) => {
+
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId
+    },
+    select: {
+      id: true,
+    }
+  })
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+  const id = user.id;
+  const concernHistories = await prisma.concernUpdate.findMany({
+    where: {
+      concern: {
+        userId: id,
+      }
+    },
+    select: {
+      concernId: true,
+      createdAt: true,
+      status: true,
+      concern: {
+        select: {
+          title: true,
+          other: true,
+          category: {
+            select: {
+              name: true,
+            }
+          }
+        }
+      }
+    }
+  })
+  console.log("Concern histories fetched:", concernHistories)
+  return concernHistories;
 }
