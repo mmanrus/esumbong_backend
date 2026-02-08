@@ -26,6 +26,7 @@ router.post(
 );
 
 
+router.get("/me", authenticateToken, userQuery.getMe)
 
 router.post("/refresh", (req, res) => {
   const refreshToken = req.cookies.refresh_token;
@@ -88,7 +89,6 @@ router.delete(
   userController.deleteUserById
 );
 router.get("/", authenticateToken, userQuery.getAllUsers);
-router.get("/me", authenticateToken, userQuery.getMe)
 router.get("/:id", authenticateToken, userQuery.getUserById);
 
 export default router;

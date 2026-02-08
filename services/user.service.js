@@ -133,6 +133,10 @@ export const getUserById = async (id) => {
       email: true,
       fullname: true,
       type: true,
+      position: true,
+      contactNumber: true,
+      address: true,
+      profilePhoto: true,
     },
   });
   return user;

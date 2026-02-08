@@ -11,7 +11,7 @@ import categoryRouter from "../routes/category.route.js";
 import announcementRouter from "../routes/announcement.route.js";
 
 import summonRouter from "../routes/summon.route.js";
-
+import feedbackRouter from "../routes/feedback.route.js"
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -40,7 +40,7 @@ app.use("/api/category", categoryRouter);
 app.use("/api/summon", summonRouter);
 
 app.use("/api/notification", notificationRouter);
-
+app.use("/api/feedback", feedbackRouter)
 app.use("/api/announcements", announcementRouter);
 if (process.env.NODE_ENV === "development") {
   app.use((req, res, next) => {
@@ -55,6 +55,9 @@ if (process.env.NODE_ENV === "development") {
 
   console.log("\n📌 User Router endpoints:");
   console.table(listEndpoints(userRouter));
+
+  console.log("\n📌 Feedback Router endpoints:");
+  console.table(listEndpoints(feedbackRouter));
 
   console.log("\n📌 Notification Router endpoints:");
   console.table(listEndpoints(notificationRouter));

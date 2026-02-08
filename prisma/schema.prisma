@@ -60,6 +60,8 @@ model User {
   createAt           DateTime         @default(now())
   isVerified         Boolean          @default(false)
   isActive           Boolean          @default(true)
+  barangay           String?
+  createdAt          DateTime         @default(now())
   // ERD
   // Resident Side
   residentConcern    Concern[]        @relation("ResidentReports")
@@ -73,9 +75,10 @@ model User {
   noticication       Notification[]   @relation("UserNotifications")
   SystemFeedback     SystemFeedback[] @relation("UserSystemFeedback")
 
-  validatedConcerns Concern[] @relation("ValidatedConcern")
-  archivedConcerns  Concern[] @relation("ArchivedConcern")
-  userAnnouncement Announcement[] @relation("UserAnnouncement")
+  validatedConcerns Concern[]      @relation("ValidatedConcern")
+  archivedConcerns  Concern[]      @relation("ArchivedConcern")
+  userAnnouncement  Announcement[] @relation("UserAnnouncement")
+  assignedTo        Concern[]      @relation("AssignedConcern")
 }
 
 enum MediaType {
@@ -100,6 +103,8 @@ model Concern {
   validatedById           Int?
   validatedBy             User?           @relation("ValidatedConcern", fields: [validatedById], references: [id])
   validatedAt             DateTime?
+  assinedToId             Int?
+  assignedTo              User?           @relation("AssignedConcern", fields: [assinedToId], references: [id])
   media                   Media[]
   category                Category?       @relation("ConcernCategory", fields: [categoryId], references: [id])
   other                   String?
@@ -147,16 +152,16 @@ model Category {
 model Feedback {
   //Fields
   id               Int             @id @default(autoincrement())
-  title            String
+  title            String // @unique
   issuedAt         DateTime        @default(now())
   updatedAt        DateTime?       @updatedAt
   //Relationships
-  authorId         Int
-  author           User            @relation("UserFeedbacks", fields: [authorId], references: [id])
+  userId           Int
+  user             User            @relation("UserFeedbacks", fields: [userId], references: [id])
   //concernId Int
   //concern   Concern   @relation("ConcernFeedback", fields: [concernId], references: [id])
   media            Media[]
-  content          String
+  feedback         String
   feedbackUpdateId Int?
   feedbackUpdate   FeedbackUpdate? @relation(fields: [feedbackUpdateId], references: [id])
 }
