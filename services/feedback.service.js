@@ -1,3 +1,4 @@
+import { AppError } from "../lib/error.js";
 import prisma from "../lib/prisma.js"
 const baseUrl = process.env.FRONTEND_URL;
 import { UserType } from "@prisma/client";
@@ -55,12 +56,24 @@ export const createFeedback = async (data, userId) => {
     );
     return newFeedback;
 }
-export const getFeedbackById = async (id) => {
-    return await prisma.feedback.findUnique({
+export const getFeedbackById = async (id, userId) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId
+        },
+        select: {
+            id: true,
+            type: true
+        }
+    })
+    if (!user) {
+        throw new AppError("User not found.", 404)
+    }
+    const feedback = await prisma.feedback.findUnique({
         where: {
             id: id
         },
-        
+
         select: {
             id: true,
             title: true,
@@ -77,13 +90,20 @@ export const getFeedbackById = async (id) => {
             }
         }
     })
+    if (!feedback) throw new AppError("Feedback not found.", 404)
+    if (user.type === "barangay_official") return feedback
+
+    if (user.type === "resident" && user.id === feedback.user.id) return feedback
+    throw new AppError("Not allowed.", 400)
 }
 
 export const getFeedbackByUserOrAll = async (me, userId = 0) => {
     if (me === "true") {
         return await prisma.feedback.findMany({
             where: {
-                id: userId
+                user: {
+                    id: userId
+                }
             },
             select: {
                 id: true,
@@ -122,10 +142,70 @@ export const updateFeedbackStatus = async (feedbackId, title, feedback) => {
     return
 }
 
-export const deleteFeedback = async (feedbackId) => {
-    return await prisma.feedback.delete({
-        where: {
-            id: feedbackId
-        }
-    })
-}
+export const deleteFeedback = async (feedbackId, userId) => {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, type: true },
+    });
+
+    if (!user) {
+        throw new AppError("User not found", 404);
+    }
+
+    const feedback = await prisma.feedback.findUnique({
+        where: { id: feedbackId },
+        select: {
+            id: true,
+            userId: true,
+        },
+    });
+
+    if (!feedback) {
+        throw new AppError("Feedback not found", 404);
+    }
+
+    // Barangay officials can delete any feedback
+    if (user.type === "barangay_official") {
+        return prisma.feedback.delete({
+            where: { id: feedbackId },
+        });
+    }
+
+    // Residents can only delete their own
+    if (user.type === "resident" && feedback.userId === user.id) {
+        return prisma.feedback.delete({
+            where: { id: feedbackId },
+        });
+    }
+
+    throw new AppError("Not allowed", 403);
+};
+
+
+
+export const updateFeedbackById = async (feedbackId, userId, data) => {
+  const feedback = await prisma.feedback.findUnique({
+    where: { id: feedbackId },
+    select: {
+      id: true,
+      userId: true,
+    },
+  });
+
+  if (!feedback) {
+    throw new AppError("Feedback not found", 404);
+  }
+
+  // ❗ Only owner can update
+  if (feedback.userId !== userId) {
+    throw new AppError("You are not allowed to edit this feedback", 403);
+  }
+
+  return prisma.feedback.update({
+    where: { id: feedbackId },
+    data: {
+      title: data.title,
+      feedback: data.feedback,
+    },
+  });
+};

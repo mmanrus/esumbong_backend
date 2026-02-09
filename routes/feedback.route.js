@@ -14,4 +14,8 @@ router.post("/", authenticateToken, authorizeRole("resident"),
 router.get("/", authenticateToken, feedbackGetController.getFeedbackByUserOrAll)
 
 router.get("/:id", authenticateToken, feedbackGetController.getFeedbackById)
+
+router.delete("/:id", authenticateToken, feedbackPostController.deleteFeedback)
+
+router.patch("/:id", authenticateToken, feedbackPostController.updateFeedbackById)
 export default router

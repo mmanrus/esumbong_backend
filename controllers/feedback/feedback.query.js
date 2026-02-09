@@ -23,9 +23,12 @@ export const getFeedbackByUserOrAll = async (req, res) => {
 
 export const getFeedbackById = async (req, res) => {
     const { id } = req.params
+    const userId = req.user?.userId
     try {
-        const feedback = await feedbackService.getFeedbackById(Number(id))
-        console.log(feedback)
+        const feedback = await feedbackService.getFeedbackById(Number(id), Number(userId))
+        if (process.env.NODE_ENV === "development") {
+            console.log("Feedbackby Id:", feedback)
+        }
         if (!feedback) {
             return res.status(404).json({
                 error: "Feedback not found"
@@ -35,6 +38,9 @@ export const getFeedbackById = async (req, res) => {
     } catch (error) {
         if (process.env.NODE_ENV === "development") {
             console.error("Error getting feedback by id:", id, error)
+        }
+        if (error.name === "AppError") {
+            return res.status(error.status).json({ error: error.message })
         }
         return res.status(500).json({
             error: "An error occurred while fetching the feedback."
