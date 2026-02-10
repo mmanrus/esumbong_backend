@@ -9,7 +9,9 @@ export const getAllUsers = async (req, res) => {
     const users = await userService.getAllUsers({ search, type });
     return res.status(200).json(users);
   } catch (error) {
-    console.error("Error getting users", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error getting users", error);
+    }
     return res.status(500).json({
       error: "An internal server error occured.",
     });
@@ -28,7 +30,9 @@ export const getMe = async (req, res) => {
     }
     return res.status(200).json(user);
   } catch (error) {
-    console.error("Error getting user by Id:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error getting user by Id:", error);
+    }
     return res.status(500).json({
       error: "An internal server error has occured",
     });
@@ -50,7 +54,9 @@ export const getUserById = async (req, res) => {
     }
     res.status(200).json(user);
   } catch (error) {
-    console.error("Error getting user by Id:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error getting user by Id:", error);
+    }
     res.status(500).json({
       error: "An internal server error has occured",
     });
@@ -71,7 +77,9 @@ export const queryUsers = async (req, res) => {
     const users = await userService.queryUsers(query, size, orderBy);
     res.status(200).json(users);
   } catch (error) {
-    console.error("Error Querying users:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error Querying users:", error);
+    }
     res.status(500).json({
       error: "An internal server error occured",
     });

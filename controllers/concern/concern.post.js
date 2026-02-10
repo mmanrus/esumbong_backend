@@ -85,7 +85,9 @@ export const updateConcernStatus = async (req, res) => {
     })
 
   } catch (error) {
-    console.error("Error updating concern status: ", error)
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error updating concern status: ", error)
+    }
     return res.status(500).json({
       error: "An error occurred upon updating the concern. "
     })
@@ -100,7 +102,9 @@ export const validateConcern = async (req, res) => {
   try {
     await concernService.validateConcern(parseInt(id), validation, parseInt(userId));
   } catch (error) {
-    console.error("Error upon validating concern:", error)
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error upon validating concern:", error)
+    }
     return res.status(500).json({
       error: "An internal server error has occurred.",
     })
@@ -115,7 +119,10 @@ export const archiveConcern = async (req, res) => {
 
     return res.status(200).json({ message: "Successfully archived the concern" })
   } catch (error) {
-    console.error("Error upon archiving the concern", error)
+
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error upon archiving the concern", error)
+    }
     return res.status(500).json({
       error: "An internal server error has occured while archiving concern"
     })
@@ -128,7 +135,10 @@ export const deleteConcern = async (req, res) => {
   try {
     await concernService.deleteConcern(parseInt(id), parseInt(userId))
   } catch (error) {
-    console.error("Error upon deleting concern:", error)
+
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error upon deleting concern:", error)
+    }
     return res.status(500).json({
       error: "An internal server error has occured while deleting Concern"
     })

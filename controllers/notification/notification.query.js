@@ -15,7 +15,9 @@ export const getUserNotifications = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.error("Error retrieving user notifications", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error retrieving user notifications", error);
+    }
     return res.status(500).json({
       error: "An internal server error has occured while getting notifications",
     });

@@ -36,7 +36,9 @@ export const createUser = async (req, res) => {
         error: "A unique field already exists.",
       });
     }
-    console.error("Error creating user:", error); // It's a good practice to log the error.
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error creating user:", error);
+    }
     res.status(500).json({
       error: "An internal server error occurred.",
     });
@@ -45,16 +47,11 @@ export const createUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
-  console.log("Log in user: hello ", email, password)
-  if (process.env.NODE === "development") {
-    console.log("Log in user: hello ", email, password)
-  }
+
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required." });
   }
-  if (process.env.NODE === "development") {
-    console.log("Log in user: hello ", email, password)
-  }
+
   try {
     const user = await userService.loginUser(email, password);
     if (!user) {
@@ -63,7 +60,9 @@ export const loginUser = async (req, res) => {
     // Authentication successful, return the user details (without the password)
     return res.status(200).json(user);
   } catch (error) {
-    console.error("Error logging in user:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error logging in user:", error);
+    }
     if (error.message === "You are restricted from using this account.") {
       return res.status(403).json({ error: error.message })
     }
@@ -98,8 +97,9 @@ export const updateUserById = async (req, res) => {
       user: updatedUser, // optional, send updated user back
     });
   } catch (error) {
-    console.error("Error message", error);
-    console.error("Error.message", error.message)
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error message", error);
+    }
     if (error.message === "Email already taken.") {
       return res.status(400).json({ error: "Email already taken." });
     }
@@ -122,7 +122,9 @@ export const deleteUserById = async (req, res) => {
     await userService.toggleUserActive(parseInt(id));
     res.status(204).send();
   } catch (error) {
-    console.error("Error deleting user:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error deleting user:", error);
+    }
     if (error.code === "P2025") {
       return res.status(404).json({
         error: "User not found.",
@@ -143,7 +145,9 @@ export const refreshAccessToken = async (req, res) => {
     const payload = await userService.refreshAccessToken();
     return res.status(200).json(payload);
   } catch (error) {
-    console.error("Error deleting user:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error deleting user:", error);
+    }
     return res.status(500).json({
       error: "An internal server error occured",
     });
@@ -163,7 +167,9 @@ export const updateUser = async (req, res) => {
     })
     return res.status(200).json({ message: "User updated successfully" });
   } catch (error) {
-    console.error("Error updating user:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error updating user:", error);
+    }
     return res.status(500).json({
       error: "An internal server error occured",
     });

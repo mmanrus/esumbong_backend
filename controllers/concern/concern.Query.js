@@ -14,7 +14,9 @@ export const getConcernById = async (req, res) => {
     return res.status(200).json({ data: concern, message: "Concern fetched successfully" });
 
   } catch (error) {
-    console.error("Error getting concern:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error getting concern:", error);
+    }
     return res
       .status(500)
       .json({ error: "An error occurred while fetching the concern." });
@@ -31,7 +33,9 @@ export const getConcernUpdatesById = async (req, res) => {
       message: "concern updates fetched successfully"
     })
   } catch (error) {
-    console.error("Error getting concern:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error getting concern:", error);
+    }
     return res
       .status(500)
       .json({ error: "An error occurred while fetching the concern." });
@@ -49,7 +53,10 @@ export const getAllConcern = async (req, res) => {
       data: concerns
     })
   } catch (error) {
-    console.error("Error getting all the concerns:", error);
+
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error getting all the concerns:", error);
+    }
     return res
       .status(500)
       .json({ error: "An error occurred while fetching all the concern." });

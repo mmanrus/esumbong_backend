@@ -91,7 +91,7 @@ export const getFeedbackById = async (id, userId) => {
         }
     })
     if (!feedback) throw new AppError("Feedback not found.", 404)
-    if (user.type === "barangay_official") return feedback
+    if (user.type === "barangay_official" || user.type === "admin") return feedback
 
     if (user.type === "resident" && user.id === feedback.user.id) return feedback
     throw new AppError("Not allowed.", 400)

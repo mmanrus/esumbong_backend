@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
-     authenticateToken,
-     authorizeRole
+  authenticateToken,
+  authorizeRole
 } from "../middleware/auth.middleware.js"
 const router = new Router();
 
@@ -15,7 +15,7 @@ router.post(
   categoryPost.createCategoryController
 );
 
-router.put(
+router.patch(
   "/:id",
   authenticateToken,
   authorizeRole(["admin", "barangay_official"]),

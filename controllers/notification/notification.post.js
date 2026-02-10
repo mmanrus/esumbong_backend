@@ -16,7 +16,9 @@ export const deleteNotification = async (req, res) => {
 
     return res.status(200).json({ message: "Notification deleted successfully." });
   } catch (error) {
-    console.error("Error upon deleting a notification:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error upon deleting a notification:", error);
+    }
     return res.status(500).json({
       error: "A server error has occurred.",
     });

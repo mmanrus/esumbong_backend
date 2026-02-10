@@ -3,7 +3,7 @@ import * as CategoryService from "../../services/category.service.js";
 export const createCategoryController = async (req, res) => {
   try {
     const { description, name } = req.body;
-    
+
 
     if (!description || !name) {
       return res.status(400).json({
@@ -14,7 +14,9 @@ export const createCategoryController = async (req, res) => {
     const newCategory = await CategoryService.createCategory({ description, name });
     return res.status(201).json(newCategory);
   } catch (error) {
-    console.error("Error upon creating category:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error upon creating category:", error);
+    }
     return res.status(500).json({
       error: "An internal server error has occurred.",
     });
@@ -30,7 +32,9 @@ export const deleteCategoryController = async (req, res) => {
     const deleted = await CategoryService.deleteCategory(parseInt(id));
     return res.status(200).json(deleted);
   } catch (error) {
-    console.error("Error upon deleting category:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error upon deleting category:", error);
+    }
     return res.status(500).json({
       error: "An internal server error has occurred.",
     });
@@ -47,11 +51,13 @@ export const updateCategoryController = async (req, res) => {
         error: "At least one of 'name' or 'description' is required.",
       });
     }
-
     const updated = await CategoryService.updateCategory(Number(id), { description, name });
     return res.status(200).json(updated);
   } catch (error) {
-    console.error("Error upon updating category:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error upon updating category:", error);
+    }
+
     return res.status(500).json({
       error: "An internal server error has occurred.",
     });
