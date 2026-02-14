@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma.js"
 import { AppError } from "../lib/error.js";
 import { sendConcernEmail } from "../lib/email.js";
+import { sendToUser } from "../lib/ws.js"
 const baseUrl = process.env.FRONTEND_URL;
 
 export const createConcern = async (data, categoryId, userId) => {
@@ -55,6 +56,10 @@ export const createConcern = async (data, categoryId, userId) => {
           userId: official.id,
         },
       });
+      sendToUser(official.id, {
+        type: "NEW_NOTIFICATION",
+        notification: { url, message, itemId: newConcern.id, type: "concern" }
+      })
       if (!process.env.RESEND_API_KEY) return; // Skip email if API key is not set
       await sendConcernEmail(
         official.email,
@@ -69,6 +74,7 @@ export const createConcern = async (data, categoryId, userId) => {
 
     })
   );
+
   return newConcern;
 };
 // !Update COncern

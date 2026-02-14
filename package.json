@@ -25,17 +25,18 @@
     "@supabase/supabase-js": "^2.89.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-list-endpoints": "^7.1.1",
     "formdata-node": "^6.0.3",
+    "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.12",
     "pg": "^8.16.3",
     "postgres": "^3.4.7",
     "resend": "^6.9.1",
     "serverless-http": "^4.0.0",
-    "ws": "^8.18.3"
+    "ws": "^8.19.0"
   }
 }

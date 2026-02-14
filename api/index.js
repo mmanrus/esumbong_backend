@@ -9,9 +9,11 @@ import userRouter from "../routes/user.routes.js";
 import concernRouter from "../routes/concern.route.js";
 import categoryRouter from "../routes/category.route.js";
 import announcementRouter from "../routes/announcement.route.js";
-
+import { initWebSocket } from "../lib/ws.js";
+import { createServer } from 'http';
 import summonRouter from "../routes/summon.route.js";
 import feedbackRouter from "../routes/feedback.route.js"
+
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -25,6 +27,7 @@ const corsOptions = process.env.NODE_ENV === "production" ? {
   credentials: true,
 } : {}
 app.use(cors(corsOptions));
+
 app.get("/api/", (req, res) => {
   res.json({ status: "ok", message: "Server is running!" });
 });
@@ -48,6 +51,10 @@ if (process.env.NODE_ENV === "development") {
     next();
   });
 }
+const server = createServer(app)
+initWebSocket(server)
+app.use(express.static('public'));
+
 const PORT = process.env.PORT || 3000;
 if (process.env.NODE_ENV === "development") {
   console.log("\n📌 Concern Router endpoints:");
@@ -63,7 +70,6 @@ if (process.env.NODE_ENV === "development") {
   console.table(listEndpoints(notificationRouter));
 }
 
-app.listen(PORT, "0.0.0.0", () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Backend running on port ${PORT}`);
 });
-
