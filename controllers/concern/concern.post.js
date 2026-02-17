@@ -101,6 +101,8 @@ export const validateConcern = async (req, res) => {
 
   try {
     await concernService.validateConcern(parseInt(id), validation, parseInt(userId));
+    return res.status(200).json({ message: "Successfully validated the concern" })
+
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.error("Error upon validating concern:", error)
@@ -134,6 +136,7 @@ export const deleteConcern = async (req, res) => {
   const userId = req.user.userId
   try {
     await concernService.deleteConcern(parseInt(id), parseInt(userId))
+    return res.status(200).json({ message: "Successfully deleted the concern" })
   } catch (error) {
 
     if (process.env.NODE_ENV === "development") {

@@ -51,6 +51,11 @@ export const createFeedback = async (data, userId) => {
                     userId: u.id,
                 },
             });
+
+            sendToUser(u.id, {
+                type: "NEW_NOTIFICATION",
+                notification: {url, message, type: "concern", userId: u.id }
+            })
         })
 
     );
@@ -184,28 +189,28 @@ export const deleteFeedback = async (feedbackId, userId) => {
 
 
 export const updateFeedbackById = async (feedbackId, userId, data) => {
-  const feedback = await prisma.feedback.findUnique({
-    where: { id: feedbackId },
-    select: {
-      id: true,
-      userId: true,
-    },
-  });
+    const feedback = await prisma.feedback.findUnique({
+        where: { id: feedbackId },
+        select: {
+            id: true,
+            userId: true,
+        },
+    });
 
-  if (!feedback) {
-    throw new AppError("Feedback not found", 404);
-  }
+    if (!feedback) {
+        throw new AppError("Feedback not found", 404);
+    }
 
-  // ❗ Only owner can update
-  if (feedback.userId !== userId) {
-    throw new AppError("You are not allowed to edit this feedback", 403);
-  }
+    // ❗ Only owner can update
+    if (feedback.userId !== userId) {
+        throw new AppError("You are not allowed to edit this feedback", 403);
+    }
 
-  return prisma.feedback.update({
-    where: { id: feedbackId },
-    data: {
-      title: data.title,
-      feedback: data.feedback,
-    },
-  });
+    return prisma.feedback.update({
+        where: { id: feedbackId },
+        data: {
+            title: data.title,
+            feedback: data.feedback,
+        },
+    });
 };

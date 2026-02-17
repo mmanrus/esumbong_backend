@@ -70,8 +70,6 @@ export const createConcern = async (data, categoryId, userId) => {
         url,
         data.files
       );
-
-
     })
   );
 
@@ -121,6 +119,10 @@ export const updateStatusConcern = async (userId, concernId, data) => {
       userId: resident.user.userId,
     },
   });
+  sendToUser(resident.user.userId, {
+    type: "NEW_NOTIFICATION",
+    notification: { url, message: `Your concern has been ${data.status}`, type: "concern" }
+  })
   const concernUpdate = await prisma.concernUpdate.create({
     data: {
       updateMessage: updateMessage,
@@ -320,6 +322,12 @@ export const validateConcern = async (concernId, action, userId) => {
       userId: updatedConcern.user.id, // resident who filed it
     },
   });
+
+  sendToUser(updatedConcern.user.id, {
+    type: "NEW_NOTIFICATION",
+    notification: { url, message, itemId: updatedConcern.id, type: "concern" }
+  })
+
   if (process.env.RESEND_API_KEY) {
     await sendConcernEmail(
       updatedConcern.user.email,  // to
@@ -429,7 +437,10 @@ export const deleteConcern = async (concernId, userId) => {
       userId: concern.user.id, // resident who filed it
     },
   });
-
+  sendToUser(concern.user.id, {
+    type: "NEW_NOTIFICATION",
+    notification: {  message, type: "concern", userId: concern.user.id }
+  })
   const officials = await prisma.user.findMany({
     where: {
       type: "barangay_official"
