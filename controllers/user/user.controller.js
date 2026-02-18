@@ -78,6 +78,7 @@ export const loginUser = async (req, res) => {
 export const updateUserById = async (req, res) => {
   const { id } = req.params;
   const updateData = {};
+  if (process.env.NODE_ENV === "development") console.log("Controller updating")
   const { email, contactNumber, password, fullname, role } = req.body;
 
   if (email) updateData.email = email;
@@ -91,6 +92,8 @@ export const updateUserById = async (req, res) => {
   }
 
   try {
+    
+  if (process.env.NODE_ENV === "development") console.log("Controller passed the checks")
     const updatedUser = await userService.updateUser(parseInt(id), updateData);
     return res.status(200).json({
       message: "User updated successfully",

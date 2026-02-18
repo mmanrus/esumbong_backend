@@ -8,7 +8,6 @@ import { Router } from "express";
 import {
   authenticateToken,
   authorizeRole,
-  authorizeUser,
 } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -62,22 +61,35 @@ router.patch(
   "/:id",
   authenticateToken,
   async (req, res, next) => {
-    const loggedInUserId = req.user.userId
+    const loggedInUserId = req.user?.userId
     const targetUserId = req.params.id
-    const user = await prisma.user.findUnique({
-      where: { id: parseInt(loggedInUserId) },
-      select: {
-        type: true
+    if (process.env.NODE_ENV === "development") console.log(`PATCHING loggedInUserId ${loggedInUserId}. targetUserId ${targetUserId}`)
+
+
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: parseInt(loggedInUserId) },
+        select: {
+          type: true,
+          id: true
+        }
+      })
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" })
       }
-    })
-    if (!user) {
-      return res.status(404).json({ error: "User not found" })
-    }
-    if (user.type === "admin") {
-      next()
-    }
-    if (loggedInUserId === targetUserId) {
-      return next()
+      if (process.env.NODE_ENV === "development") console.log(`PATCHING userId ${user.id}`)
+      if (user.type === "admin") {
+        return next()
+      }
+      if (parseInt(loggedInUserId) === parseInt(targetUserId)) {
+        return next()
+      }
+      if (process.env.NODE_ENV === "development") console.log(`whats next?`)
+      return res.status(403).json({ error: "Forbidden" });
+    } catch (err) {
+      if (process.env.NODE_ENV === "development") console.log(err)
+      return res.status(500).json({ error: "Something went wrong upon updating the profile" })
     }
   },
   userController.updateUserById

@@ -151,18 +151,23 @@ export const getUserById = async (id) => {
  */
 export const updateUser = async (id, userData) => {
   const userToUpdate = { ...userData };
+  const user = await prisma.user.findFirst({
+    where: { id },
+    select: { email: true }
+  })
+  if (userData.email !== user.email) {
+    if (userData.email) {
+      const existingUser = await prisma.user.findFirst({
+        where: { email: userData.email },
+        select: { email: true },
+      });
 
-  if (userData.email) {
-    const existingUser = await prisma.user.findFirst({
-      where: { email: userData.email },
-      select: { email: true },
-    });
-
-    if (existingUser) {
-      // Instead of throwing, return a custom error object
-      const err = new Error("Email already taken.");
-      err.code = "EMAIL_TAKEN";
-      throw err; // this is fine, but must catch correctly
+      if (existingUser) {
+        // Instead of throwing, return a custom error object
+        const err = new Error("Email already taken.");
+        err.code = "EMAIL_TAKEN";
+        throw err; // this is fine, but must catch correctly
+      }
     }
   }
 
