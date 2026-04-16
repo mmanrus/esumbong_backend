@@ -1,0 +1,71 @@
+
+import * as feedbackService from "../../services/feedback.service.js"
+
+export const getFeedbackByUserOrAll = async (req, res) => {
+    const { me, spam, cursor } = req.query
+    let userId;
+    const isSpam = spam === "true" ? true : spam === "false" ? false : undefined
+    const barangayId = parseInt(req.user.barangayId)
+    if (!barangayId) {
+        return res.status(400).json({ error: "Barangay official not assigned to a barangay." })
+    }
+    if (me === "true") {
+        userId = Number(req.user?.userId)
+    }
+    const cursorInt = cursor ? Number(cursor) : undefined
+
+    try {
+        const feedbacks = await feedbackService.getFeedbackByUserOrAll(barangayId, me, userId, isSpam, cursorInt)
+        return res.status(200).json({
+            feedbacks
+        })
+    } catch (error) {
+        if (process.env.NODE_ENV === "development") {
+            console.error("Error getting feedback:", error);
+        }
+        return res.status(500).json({
+            error: "An error occurred while fetching feedback."
+        })
+    }
+}
+
+export const getFeedbackById = async (req, res) => {
+    const { id } = req.params
+    const userId = req.user?.userId
+    try {
+        const feedback = await feedbackService.getFeedbackById(Number(id), Number(userId))
+        if (process.env.NODE_ENV === "development") {
+            console.log("Feedbackby Id:", feedback)
+        }
+        if (!feedback) {
+            return res.status(404).json({
+                error: "Feedback not found"
+            })
+        }
+        return res.status(200).json(feedback)
+    } catch (error) {
+        if (process.env.NODE_ENV === "development") {
+            console.error("Error getting feedback by id:", id, error)
+        }
+        if (error.name === "AppError") {
+            return res.status(error.status).json({ error: error.message })
+        }
+        return res.status(500).json({
+            error: "An error occurred while fetching the feedback."
+        })
+    }
+}
+
+/**
+ * GET /api/feedback/public
+ * No auth. Returns up to 9 public-safe feedbacks with star > 0.
+ */
+export const getPublicFeedbacks = async (req, res) => {
+    try {
+        const feedbacks = await feedbackService.getPublicFeedbacks()
+        return res.status(200).json(feedbacks)
+    } catch (error) {
+        console.error("Error fetching public feedbacks:", error)
+        return res.status(500).json({ error: "Failed to fetch feedbacks." })
+    }
+}
