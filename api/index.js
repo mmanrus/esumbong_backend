@@ -31,7 +31,7 @@ const corsOptions = process.env.NODE_ENV === "production" ? {
 } : {}
 app.use(cors(corsOptions));
 
-app.get("/api/", (req, res) => {
+app.get("/health", (req, res) => {
   res.json({ status: "ok", message: "Server is running!" });
 });
 app.get("/", (req, res) => {
