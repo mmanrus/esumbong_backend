@@ -6,9 +6,9 @@ import prisma from "../lib/prisma.js"
  * Paginated notifications for a user.
  * Returns { data, nextCursor, hasNextPage, unreadCount }
  */
-export const getUserNotifications = async (userId,barangayId, cursor, take = 20) => {
+export const getUserNotifications = async (userId, cursor, take = 20) => {
   const results = await prisma.notification.findMany({
-    where: { userId: parseInt(userId), barangayId },
+    where: { userId: parseInt(userId), },
     select: {
       id: true,
       url: true,

@@ -15,7 +15,6 @@ export const getUserNotifications = async (req, res) => {
   try {
     const result = await notificationService.getUserNotifications(
       userId,
-      barangayId,
       cursor || null,
       take ? parseInt(take) : 20
     );

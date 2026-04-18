@@ -87,6 +87,7 @@ router.patch(
   },
   userController.updateUserById
 );
+router.post("/:id/change-password", authenticateToken, userController.changePassword);
 router.delete(
   "/:id",
   authenticateToken,

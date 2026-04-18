@@ -7,7 +7,7 @@ import { sendToUser } from "../lib/ws.js";
 
 // ─── Paste these updated functions into your existing feedback.service.js ─────
 
-export const createFeedback = async (data, userId) => {
+export const createFeedback = async (data, userId, barangayId) => {
     const response = await checkAndUpdatePostCount(userId)
     if (!response.allowed) {
         throw new AppError(response.message, 429)
@@ -16,7 +16,7 @@ export const createFeedback = async (data, userId) => {
     const newFeedback = await prisma.feedback.create({
         data: {
             userId,
-            barangayId: data.barangayId,
+            barangayId,
             title: data.title,
             feedback: data.feedback,
             isSpam: data.isSpam,

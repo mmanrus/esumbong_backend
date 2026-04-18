@@ -57,6 +57,7 @@ export const loginUser = async (email, password) => {
   if (!user) {
     throw new AppError("Invalid credentials.", 401)
   }
+  console.log("User logged :", user)
   if (user.isActive === false) {
     throw new AppError("You are restricted from using this account.", 401)
   }
@@ -81,7 +82,6 @@ export const loginUser = async (email, password) => {
       )
       return {
         status: 423,
-
         message: "Your account is locked.",
         user: {
           id: user.id,
@@ -132,7 +132,7 @@ export const loginUser = async (email, password) => {
   }
   if (process.env.NODE_ENV === "development") console.log("give jwt.")
   const access = jwt.sign(
-    { userId: user.id, type: user.type, isVerified: user.isVerified }, // store 'type' to match middleware
+    { userId: user.id, type: user.type, isVerified: user.isVerified, barangayId: user.barangayId }, // store 'type' to match middleware
     JWT_SECRET,
     { expiresIn: "15m" }
   );
@@ -299,6 +299,42 @@ export const queryUsers = async (query, size = 20, orderBy = "asc") => {
   return users;
 };
 
+
+export const changePassword = async (id, currentPassword, newPassword) => {
+  const user = await prisma.user.findUnique({ where: { id }, select: { password: true } });
+  if (!user) throw new AppError("User not found.", 404);
+
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) throw new AppError("Current password is incorrect.", 400);
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({ where: { id }, data: { password: hashed } });
+};
+
+export const getUserPhoto = async (id) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { profilePhoto: true },
+  });
+  if (!user) throw new AppError("User not found.", 404);
+  return { profilePhoto: user.profilePhoto ?? null };
+};
+
+export const updateUserPhoto = async (id, profilePhoto) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+  if (!user) throw new AppError("User not found.", 404);
+
+  const updated = await prisma.user.update({
+    where: { id },
+    data: { profilePhoto },
+    select: { id: true, profilePhoto: true },
+  });
+
+  return updated;
+};
 // ─── Add to your user.service.js ─────────────────────────────────────────────
 /**
  * Verifies a refresh token and issues a new access token.
@@ -321,7 +357,7 @@ export const refreshAccessToken = async (refreshToken) => {
 
     // Sign a fresh 15-minute access token with the same shape your middleware expects
     const newAccess = jwt.sign(
-      { userId: user.id, type: user.type, isVerified: user.isVerified },
+      { userId: user.id, type: user.type, isVerified: user.isVerified, barangayId: user.barangayId },
       JWT_SECRET,
       { expiresIn: "15m" }
     );
@@ -484,25 +520,24 @@ export const checkVerified = async (userId) => {
   if (process.env.NODE_ENV === "development") console.log("Status:", media.verificationStatus)
   return { verificationStatus: media.verificationStatus }
 }
-export const getStats = async () => {
-  const totalUsers = await prisma.user.count();
+export const getStats = async (barangayId) => {
+  const where = barangayId ? { barangayId, isActive: true } : { isActive: true };
+
+  const totalUsers = await prisma.user.count({ where });
 
   const totalResidents = await prisma.user.count({
-    where: { type: "resident" },
+    where: { ...where, type: "resident" },
   });
 
   const totalBarangayOfficials = await prisma.user.count({
-    where: { type: "barangay_official" },
+    where: { ...where, type: "barangay_official" },
   });
 
-  const totalConcerns = await prisma.concern.count();
+  const totalConcerns = await prisma.concern.count({
+    where: barangayId ? { barangayId } : {},
+  });
 
-  return {
-    totalUsers,
-    totalResidents,
-    totalBarangayOfficials,
-    totalConcerns,
-  };
+  return { totalUsers, totalResidents, totalBarangayOfficials, totalConcerns };
 };
 
 export const getPostCount = async (id) => {

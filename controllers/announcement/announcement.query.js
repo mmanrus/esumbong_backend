@@ -6,8 +6,9 @@ export const getAllAnnouncements = async (req, res) => {
     const { sidebar, cursor } = req.query
     const isSidebar = sidebar === "true" ? true : false
     const cursorInt = cursor ? Number(cursor) : undefined
+    const barangayId = req.user?.barangayId
     try {
-        const announcements = await announcementService.getAllAnnouncements(parseInt(userId), isSidebar, cursorInt)
+        const announcements = await announcementService.getAllAnnouncements(parseInt(userId), isSidebar, cursorInt, barangayId)
 
         return res.status(200).json(announcements)
     } catch (error) {

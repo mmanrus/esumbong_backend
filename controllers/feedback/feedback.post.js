@@ -6,7 +6,7 @@ export const createFeedback = async (req, res) => {
   const anonymous = isAnonymous === "true" || isAnonymous === true
   const barangayId = parseInt(req.user.barangayId)
   if (!barangayId) {
-    return res.status(400).json({ error: "Barangay official not assigned to a barangay."})
+    return res.status(400).json({ error: "User not assigned to a barangay."})
   }
   if (!title || !feedback) {
     return res.status(400).json({
@@ -25,8 +25,9 @@ export const createFeedback = async (req, res) => {
   const userId = req.user?.userId;
   try {
     await feedbackService.createFeedback(
-      {barangayId, title, feedback, isAnonymous: anonymous, media, isSpam: spam, categoryId, other, star: star ? Number(star) : null },
-      parseInt(userId)
+      { title, feedback, isAnonymous: anonymous, media, isSpam: spam, categoryId, other, star: star ? Number(star) : null },
+      parseInt(userId),
+      barangayId
     );
     return res.status(201).json({ message: "Your feedback has been filed." });
   } catch (error) {

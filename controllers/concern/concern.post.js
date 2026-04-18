@@ -34,7 +34,7 @@ export const createConcern = async (req, res) => {
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   const parsedCategoryId = categoryId ? Number(categoryId) : null;
-
+  console.log("req.user:", req.user); // ← add this
   try {
     await concernService.createConcern(
       {
@@ -49,6 +49,7 @@ export const createConcern = async (req, res) => {
       },
       parsedCategoryId,
       userId,
+      barangayId
     );
 
     return res.status(200).json({ message: "Your concern has been filed." });
@@ -60,7 +61,6 @@ export const createConcern = async (req, res) => {
     return res.status(500).json({ error: "An error occurred while creating the concern." });
   }
 };
-
 
 export const updateConcernStatus = async (req, res) => {
 

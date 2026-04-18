@@ -43,6 +43,7 @@ router.post(
   "/",
   authenticateToken,
   authorizeRole("resident"),
+  (req, res, next) => {console.log("user user/ ", req.user); next()},
   concernPost.createConcern
 );
 

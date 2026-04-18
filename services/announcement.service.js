@@ -103,21 +103,22 @@ export const getAnnouncementById = async (id, userId) => {
     return announcement
 }
 
-export const getAllAnnouncements = async (userId, sidebar = false, cursor, take = 10) => {
+export const getAllAnnouncements = async (userId, sidebar = false, cursor, barangayId, take = 10) => {
     let whereClause;
+    
     if (userId) {
         const user = await prisma.user.findUnique({
 
             where: { id: userId },
-            select: { type: true },
+            select: { type: true, },
         });
 
 
         if (!user) throw new Error("User not found");
 
         whereClause = user.type === "resident"
-            ? { notifyResidents: true }
-            : { notifyOfficials: true };
+            ? { notifyResidents: true, barangayId }
+            : { notifyOfficials: true, barangayId };
     } {
         whereClause = { notifyResidents: true }
     }

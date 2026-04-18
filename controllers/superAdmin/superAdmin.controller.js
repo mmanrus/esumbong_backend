@@ -162,7 +162,7 @@ export const assignAdmin = async (req, res) => {
     }
 
     const existingAdmin = await prisma.user.findFirst({
-      where: { barangayId: parseInt(barangayId), type: "admin" },
+      where: { barangayId: parseInt(barangayId), type: "admin", isActive: true },
     });
     if (existingAdmin) {
       return res.status(409).json({

@@ -83,6 +83,26 @@ export const loginUser = async (req, res) => {
     return res.status(500).json({ error: "An internal server error occurred." });
   }
 };
+
+export const changePassword = async (req, res) => {
+  const { id } = req.params;
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword)
+    return res.status(400).json({ error: "All fields are required." });
+
+  try {
+    await userService.changePassword(parseInt(id), currentPassword, newPassword);
+    return res.status(200).json({ message: "Password changed successfully." });
+  } catch (error) {
+    if (error.name === "AppError")
+      return res.status(error.statusCode).json({ error: error.message });
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+
+
 export const updateUserById = async (req, res) => {
   const { id } = req.params;
   const updateData = {};
@@ -254,9 +274,10 @@ export const checkVerified = async (req, res) => {
 }
 
 export const getStats = async (req, res) => {
-
+  const barangayId = parseInt(req.user.barangayId)
+  console.log(barangayId)
   try {
-    const data = await userService.getStats()
+    const data = await userService.getStats(barangayId)
     return res.status(200).json({
       message: "Success",
       stats: data

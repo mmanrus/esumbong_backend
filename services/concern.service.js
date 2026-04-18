@@ -5,21 +5,21 @@ import { checkAndUpdatePostCount } from "../lib/checkPostLimit.js"
 import { sendToUser } from "../lib/ws.js"
 const baseUrl = process.env.FRONTEND_URL;
 
-export const createConcern = async (data, categoryId, userId) => {
+export const createConcern = async (data, categoryId, userId, barangayId) => {
   const response = await checkAndUpdatePostCount(userId)
   if (!response.allowed) {
     throw new AppError(response.message, 429)
   }
-  // Get the user's barangayId so the concern is scoped correctly
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { barangayId: true, fullname: true },
-  });
-
-  if (!user?.barangayId) {
+  // Get the user's barangayId so the concern is scoped correctly  
+  if (!barangayId) {
     throw new AppError("User is not assigned to a barangay.", 400);
   }
-
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+      barangayId
+    }
+  })
 
   const newConcern = await prisma.concern.create({
     data: {
@@ -247,7 +247,7 @@ export const getAllConcerns = async ({ search, status, archived, validation, rec
         validation !== undefined ? { validation } : {},
         spam !== undefined ? { isSpam: spam } : {},
         isAnonymous !== undefined ? { isAnonymous } : {},
-        barangayId
+        { barangayId }
       ],
     },
     select: {
@@ -261,6 +261,7 @@ export const getAllConcerns = async ({ search, status, archived, validation, rec
       issuedAt: true,
       updatedAt: true,
       status: true,
+      isAnonymous: true,
       needsBarangayAssistance: true,
       other: true,
       validatedBy: {
