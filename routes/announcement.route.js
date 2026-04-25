@@ -1,4 +1,4 @@
-t// this is an exampple
+// this is an exampple
 import { Router } from "express"
 import { authenticateToken, authorizeRole } from "../middleware/auth.middleware.js"
 import * as announcementPost from "../controllers/announcement/announcement.post.js"

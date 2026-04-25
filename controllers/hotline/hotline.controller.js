@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+
+import prisma from "../../lib/prisma.js";
 
 export const getHotlines = async (req, res) => {
   const barangayId = parseInt(req.query.barangayId);
