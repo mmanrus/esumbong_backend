@@ -87,6 +87,10 @@ router.patch(
   },
   userController.updateUserById
 );
+// In your users router
+router.get("/:id/photo", authenticateToken, userController.getUserPhoto);
+router.patch("/:id/photo", authenticateToken, userController.updateUserPhoto);
+
 router.post("/:id/change-password", authenticateToken, userController.changePassword);
 router.delete(
   "/:id",

@@ -1,4 +1,4 @@
-
+t// this is an exampple
 import { Router } from "express"
 import { authenticateToken, authorizeRole } from "../middleware/auth.middleware.js"
 import * as announcementPost from "../controllers/announcement/announcement.post.js"
@@ -17,7 +17,7 @@ router.post("/",
 //router.get("/", announcementQuery.getAllAnnouncements)
 router.patch("/:id",
     authenticateToken,
-    authorizeRole("barangay_official"),
+    authorizeRole("barangay_official"), // admin, barangay_official
     announcementPost.updateAnnouncement
 )
 router.get("/:id", announcementQuery.getAnnouncementById)

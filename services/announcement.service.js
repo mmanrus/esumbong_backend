@@ -43,7 +43,7 @@ export const createAnnouncement = async (data, userId, barangayId) => {
                     type: "announcement",
                     message,
                     userId: user.id,
-                    barangayId
+                
                 }
             })
         }))

@@ -101,18 +101,55 @@ export const changePassword = async (req, res) => {
   }
 };
 
+export const getUserPhoto = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const photo = await userService.getUserPhoto(parseInt(id));
+    return res.status(200).json(photo);
+  } catch (error) {
+    if (error.name === "AppError")
+      return res.status(error.statusCode).json({ error: error.message });
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
 
+export const updateUserPhoto = async (req, res) => {
+  const { id } = req.params;
+  const loggedInUserId = parseInt(req.user?.userId);
+  const targetId = parseInt(id);
+
+  // Only allow updating own photo unless admin
+  if (req.user?.type !== "admin" && loggedInUserId !== targetId) {
+    return res.status(403).json({ error: "Forbidden." });
+  }
+
+  const { profilePhoto } = req.body;
+  if (!profilePhoto)
+    return res.status(400).json({ error: "profilePhoto is required." });
+
+  try {
+    const updated = await userService.updateUserPhoto(targetId, profilePhoto);
+    return res.status(200).json({
+      message: "Profile photo updated successfully.",
+      profilePhoto: updated.profilePhoto,
+    });
+  } catch (error) {
+    if (error.name === "AppError")
+      return res.status(error.statusCode).json({ error: error.message });
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
 
 export const updateUserById = async (req, res) => {
   const { id } = req.params;
   const updateData = {};
   if (process.env.NODE_ENV === "development") console.log("Controller updating")
-  const { email, contactNumber, password, fullname, role } = req.body;
+  const { email, contactNumber, password, fullname, type } = req.body;
 
   if (email) updateData.email = email;
   if (contactNumber) updateData.contactNumber = contactNumber;
   if (fullname) updateData.fullname = fullname;
-  if (role) updateData.role = role;
+  if (type) updateData.type = type;
   if (password && password.trim() !== "") updateData.password = password;
 
   if (Object.keys(updateData).length === 0) {

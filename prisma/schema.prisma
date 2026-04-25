@@ -54,6 +54,23 @@ model Barangay {
   feedbacks      Feedback[]
   announcements  Announcement[]
   categories     Category[]
+  hotlines       Hotline[]
+}
+
+model Hotline {
+  id          Int      @id @default(autoincrement())
+  label       String
+  number      String
+  icon        String // store icon name as string e.g. "Shield", "Flame", "Ambulance"
+  bgColor     String   @default("bg-blue-50")
+  borderColor String   @default("border-blue-200")
+  textColor   String   @default("text-blue-700")
+  iconBg      String   @default("bg-blue-500")
+  order       Int      @default(0)
+  barangayId  Int
+  barangay    Barangay @relation(fields: [barangayId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum UserType {

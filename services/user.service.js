@@ -159,6 +159,7 @@ export const loginUser = async (email, password) => {
  */
 
 export const getAllUsers = async ({ search, type, barangayId }, cursor, take = 20) => {
+  console.log(barangayId)
   const results = await prisma.user.findMany({
     ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     where: {
