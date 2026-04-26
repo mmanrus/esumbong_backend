@@ -17,6 +17,7 @@ import publicRoute from "../routes/stat.route.js"
 import superAdminRouter from "../routes/superAdmin.route.js";
 import geographyRouter from "../routes/geography.route.js";
 import hotlineRouter from "../routes/hotline.route.js";
+import analyticsRouter from "../routes/analytics.route.js";
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
   res.json({ status: "ok", message: "Server is running!" });
 });
 
+app.use("/api/analytics", analyticsRouter);
 app.use("/api/users", userRouter);
 app.use("/api/super-admin", superAdminRouter);
 app.use("/api/geography", geographyRouter);
