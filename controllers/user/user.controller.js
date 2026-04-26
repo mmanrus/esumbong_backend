@@ -46,7 +46,7 @@ export const createUser = async (req, res) => {
     });
   }
 };
-
+// login
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -205,6 +205,7 @@ export const deleteUserById = async (req, res) => {
     });
   }
 };
+// router.post("/refresh", userController.refreshToken);
 
 export const refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
