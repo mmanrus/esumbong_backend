@@ -1,6 +1,6 @@
 
 import prisma from "../../lib/prisma.js";
-
+import { sendToBarangay } from "../../lib/ws.js";
 export const getHotlines = async (req, res) => {
   const barangayId = parseInt(req.query.barangayId);
   if (!barangayId) {
@@ -41,6 +41,7 @@ export const createHotline = async (req, res) => {
         barangayId,
       },
     });
+    sendToBarangay(barangayId, "hotlineCreated", hotline);
     return res.status(201).json(hotline);
   } catch (error) {
     console.error(error);
@@ -62,6 +63,7 @@ export const updateHotline = async (req, res) => {
       where: { id },
       data: { label, number, icon, bgColor, borderColor, textColor, iconBg },
     });
+    sendToBarangay(barangayId, "hotlineUpdated", updated);
     return res.json(updated);
   } catch (error) {
     console.error(error);
@@ -78,6 +80,7 @@ export const deleteHotline = async (req, res) => {
     if (!existing) return res.status(404).json({ error: "Hotline not found" });
 
     await prisma.hotline.delete({ where: { id } });
+    sendToBarangay(barangayId, "hotlineDeleted", existing);
     return res.json({ message: "Hotline deleted" });
   } catch (error) {
     console.error(error);
