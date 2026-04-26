@@ -456,7 +456,7 @@ export const sendVerify = async (userId, metaData) => {
       await prisma.notification.create({
         data: {
           message,
-          type: "verification",
+          type: "userVerification",
           userId: admin.id,
         },
       });
